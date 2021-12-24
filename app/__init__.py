@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint
-import sqlite3
+import sqlite3, uuid
 
 try:
   from config import config, DevelopmentConfig, ProductionConfig
@@ -51,10 +51,28 @@ def create_app(config_name):
     except Exception as e:
       print('')
       print('An error occurred initalizing the app. Be sure to set the environment')
-      print('variables FLASK_ENV=(development|production) and FLASK_APP=application.py')
+      print('variables FLASK_ENV=(development|production) and FLASK_APP=myapp.py')
       print('')
       raise e
-    
+
+            
+    db = sqlite3.connect(config[config_name].DB_NAME)
+    cur = db.cursor()
+  
+    try:
+        cur.executescript("""
+            create table if not exists events(
+                id INTEGER PRIMARY KEY,
+                user_facing_id VARCHAR(32),
+                title TEXT,
+                description TEXT,
+                status INTEGER DEFAULT(0) -- 0: active, 1: disabled, 2: reserved for future use
+            );
+        """)
+        db.commit()
+        db.close()
+    except:
+        print("Database already exists!")
 
     from app.landing import landing_bp
     app.register_blueprint(landing_bp)

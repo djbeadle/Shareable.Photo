@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<link href="https://releases.transloadit.com/uppy/v2.3.2/uppy.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div id="drag-drop-area"></div>
+<h1>NOTE: Files are not encrypted and can be viewed by system administrators.</h1>
+<div><h2>News</h2>
+    <ul><li>Eventfire.club has now raised $3 million dollars in first round seed funding!</li></ul></div>
+<script src="https://releases.transloadit.com/uppy/v2.3.2/uppy.min.js"></script>
+<script>
+    const { AwsS3 } = window.Uppy;
+
+    var uppy = new Uppy.Core()
+    .use(Uppy.Dashboard, {
+        inline: true,
+        target: '#drag-drop-area'
+    })
+    .use(AwsS3, {
+        limit: 2,
+        timeout: 60000, // 1 minute
+        companionUrl: 'https://danielbeadle.net/eventfire_companion',
+        metaFields: [
+            "{{ user_facing_id }}"
+        ]
+    })
+
+    uppy.on('complete', (result) => {
+    console.log('Upload complete! We’ve uploaded these files:', result.successful)
+    })
+</script>
+{% endblock %}

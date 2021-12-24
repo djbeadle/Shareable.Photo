@@ -1,3 +1,5 @@
+*.db
+
 # Config file with keys
 config.py
 

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Create New Event</h1>
+<form action="/create_event" method="post" id="form1">
+    <label>
+        Title
+        <input name="title" />
+    </label>
+    <label>
+        Description
+        <input name="description" />
+    </label>
+
+    <label>
+        Event Status
+        <select>
+            <option value="0">Active</option>
+            <option value="1">Deactivated</option>
+        </select>
+    </label>
+    <button type="submit" value="create">Create</button>
+</form>
+{% endblock %}

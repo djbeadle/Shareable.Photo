@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <head>
     <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.css'>
+
+    <styles>
+        {% block extra_styles %}
+        {% endblock %}
+    </styles>
 </head>
 <body>
+    <nav>
+        <a href="/events">Events</a>
+        <a href="/create_event">Create</a>
+    </nav>
 <h1>{{ config['APP_NAME'] }}</h1>
 {% block content %}
 {% endblock %}
