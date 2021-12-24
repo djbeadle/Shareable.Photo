@@ -41,7 +41,7 @@ def list_events():
 def get_event(user_facing_id: str):
     return render_template(
         'info.html',
-        content=f'{get_event_info(id)}'
+        content=f'{get_event_info(user_facing_id)}'
     )
 
 
