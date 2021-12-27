@@ -21,10 +21,7 @@
     .use(AwsS3, {
         limit: 2,
         timeout: 60000, // 1 minute
-        companionUrl: 'https://danielbeadle.net/eventfire_companion',
-        metaFields: [
-            "{{ user_facing_id }}"
-        ]
+        companionUrl: '/{{user_facing_id}}/'
     })
 
     uppy.on('complete', (result) => {
