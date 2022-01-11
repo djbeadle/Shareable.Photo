@@ -1,6 +1,4 @@
-
-
-import logging, os
+import logging, os, json
 from flask import current_app
 import boto3
 from botocore.config import Config
@@ -18,6 +16,14 @@ S3_CLIENT = boto3.client(
     aws_access_key_id=_current_config.AWS_ACCESS_KEY_ID,
     aws_secret_access_key=_current_config.AWS_SECRET_ACCESS_KEY
 )
+
+def process_sns(msg, tstamp):
+    js = json.loads(msg)
+    msg = 'Region: {0} / Alarm: {1}'.format(
+        js['Region'], js['AlarmName']
+    )
+    print(json.dumps(msg))
+    # do stuff here, like calling your favorite SMS gateway API
 
 def generate_presigned_post(filename, type):
     """
