@@ -18,11 +18,7 @@ S3_CLIENT = boto3.client(
 )
 
 def process_sns(msg, tstamp):
-    js = json.loads(msg)
-    msg = 'Region: {0} / Alarm: {1}'.format(
-        js['Region'], js['AlarmName']
-    )
-    print(json.dumps(msg))
+    print(msg)
     # do stuff here, like calling your favorite SMS gateway API
 
 def generate_presigned_post(filename, type):

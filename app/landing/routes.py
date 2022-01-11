@@ -3,7 +3,7 @@ from flask import render_template, request, current_app, Response
 from db_operations import create_event, get_event_info, list_all_events
 from app.landing import landing_bp
 
-import json
+import json, urllib
 from datetime import datetime
 
 from s3 import generate_presigned_post, process_sns
@@ -54,13 +54,16 @@ def sns():
     # AWS sends JSON with text/plain mimetype
     try:
         js = json.loads(request.data)
+        print(json.dumps(js, indent=2))
     except:
         pass
 
     hdr = request.headers.get('X-Amz-Sns-Message-Type')
     # subscribe to the SNS topic
     if hdr == 'SubscriptionConfirmation' and 'SubscribeURL' in js:
-        r = requests.get(js['SubscribeURL'])
+        # r = requests.get(js['SubscribeURL'])
+        with urllib.request.urlopen(js['SubscribeURL']) as f:
+            print(f.read().decode('utf-8'))
 
     if hdr == 'Notification':
         process_sns(js['Message'], js['Timestamp'])
@@ -72,7 +75,7 @@ def sns():
 def get_presigned_s3_upload_url(user_facing_id):
     # TODO-prod: Keep tracing of the user_facing_ids and validate if this is in the database. For now just see if it's a valid UUID
     try:
-        current_user_facing_id = UUID(user_facing_id)``
+        current_user_facing_id = UUID(user_facing_id)
     except ValueError as e:
         print(e)
         return Response({"error": "Now just hold on a minute, bucko."}, status=400, mimetype="application/json")
