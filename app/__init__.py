@@ -42,7 +42,7 @@ def create_app(config_name):
     """
 
     app = Flask(__name__, static_url_path="/static")
-    print('this is the config name: {}'.format(config_name))
+    print('This is the config name: {}'.format(config_name))
     
     # Select the desired config object from FLASK_ENV environment variable
     try:
