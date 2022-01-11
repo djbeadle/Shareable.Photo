@@ -6,7 +6,7 @@ from app.landing import landing_bp
 import json
 from datetime import datetime
 
-from s3 import generate_presigned_post
+from s3 import generate_presigned_post, process_sns
 
 @landing_bp.route('/', methods=['GET'])
 def home():
@@ -49,11 +49,30 @@ def get_event(user_facing_id: str):
     )
 
 
+@landing_bp.route('/s3_upload_callback', methods = ['GET', 'POST', 'PUT'])
+def sns():
+    # AWS sends JSON with text/plain mimetype
+    try:
+        js = json.loads(request.data)
+    except:
+        pass
+
+    hdr = request.headers.get('X-Amz-Sns-Message-Type')
+    # subscribe to the SNS topic
+    if hdr == 'SubscriptionConfirmation' and 'SubscribeURL' in js:
+        r = requests.get(js['SubscribeURL'])
+
+    if hdr == 'Notification':
+        process_sns(js['Message'], js['Timestamp'])
+
+    return 'OK\n'
+
+
 @landing_bp.route('/<user_facing_id>/s3/params')
 def get_presigned_s3_upload_url(user_facing_id):
     # TODO-prod: Keep tracing of the user_facing_ids and validate if this is in the database. For now just see if it's a valid UUID
     try:
-        current_user_facing_id = UUID(user_facing_id)
+        current_user_facing_id = UUID(user_facing_id)``
     except ValueError as e:
         print(e)
         return Response({"error": "Now just hold on a minute, bucko."}, status=400, mimetype="application/json")
