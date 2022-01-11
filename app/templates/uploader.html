@@ -13,10 +13,15 @@
 <script>
     const { AwsS3 } = window.Uppy;
 
-    var uppy = new Uppy.Core()
+    var uppy = new Uppy.Core(
+    {
+          restrictions: {
+              allowedFileTypes: ['.heic', '.heif'],
+          },
+    })
     .use(Uppy.Dashboard, {
         inline: true,
-        target: '#drag-drop-area'
+        target: '#drag-drop-area',
     })
     .use(AwsS3, {
         limit: 2,
