@@ -9,13 +9,6 @@ def get_db():
     return db
 
 
-@current_app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
-
-
 def list_all_events():
     db = sqlite3.connect(current_app.config['DB_NAME'])
     cur = db.cursor()
@@ -61,8 +54,22 @@ def create_event(title: str, description: str, status=0):
 
 def record_upload(filename, eventName, eventTime, awsRegion, sourceIp,  size, etag):
     try:
-        cur = get_db().cursor()
-        cur.execute("INSERT INTO assets(filename, create_date, aws_region, uploader_ip, event_id, size, etag, event_id) values (?,?,?,?,?,?,?,?);")
+        db = get_db()
+        cur = db.cursor()
+        cur.execute(
+            "INSERT INTO assets(filename, create_date, aws_region, uploader_ip, event_id, size, etag) values (?,?,?,?,?,?,?);",
+            [filename, eventTime, awsRegion, sourceIp, eventName, size, etag]
+        )
+        db.commit()
     except Exception as e:
         print(f'An error occurred while trying to insert {filename} into the assets table.')
         print(e)
+
+def event_asset_count(event_id: str):
+    db = get_db()
+    cur = db.cursor()
+
+    print(event_id)
+    cur.execute("SELECT count(filename) FROM assets WHERE event_id=?;", [event_id])
+    return cur.fetchone()[0]
+

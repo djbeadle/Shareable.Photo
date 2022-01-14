@@ -3,5 +3,7 @@
 {% block content %}
 {{ content }}
 <br>
+Number of files: {{asset_count}}
+<br>
 <img src="{{ url_for('static', filename='kitten.jpg') }}">
 {% endblock %}

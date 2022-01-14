@@ -1,12 +1,12 @@
 from uuid import uuid4, UUID
 from flask import render_template, request, current_app, Response
-from db_operations import create_event, get_event_info, list_all_events
+from db_operations import create_event, get_event_info, list_all_events, record_upload, event_asset_count
 from app.landing import landing_bp
 
 import json, urllib
 from datetime import datetime
 
-from s3 import generate_presigned_post, record_upload
+from s3 import generate_presigned_post
 
 @landing_bp.route('/', methods=['GET'])
 def home():
@@ -45,6 +45,7 @@ def list_events():
 def get_event(user_facing_id: str):
     return render_template(
         'info.html',
+        asset_count=event_asset_count(user_facing_id),
         content=f'{get_event_info(user_facing_id)}'
     )
 
@@ -109,16 +110,17 @@ def sns():
         print(js['Message'], js['Timestamp'])
 
     msg = js['Message']
-    for r in msg['Records']:
-        folder, filename = r['object']['key'].split('/')
+    for r in json.loads(msg)['Records']:
+        # print(json.dumps(r, indent=2))
+        folder, filename = r['s3']['object']['key'].split('/')
         record_upload(
-            msg['filename'],
-            msg['eventName'],
-            msg['eventTime'],
-            msg['awsRegion'],
-            msg['requestParameters']['sourceIpAddress'],
-            msg['size'],
-            msg['etag']
+            filename,
+            folder,
+            r['eventTime'],
+            r['awsRegion'],
+            r['requestParameters']['sourceIPAddress'],
+            r['s3']['object']['size'],
+            r['s3']['object']['eTag'],
         )
 
     return 'OK\n'

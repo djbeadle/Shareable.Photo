@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, g
 import sqlite3, uuid
 
 try:
@@ -18,7 +18,8 @@ from app.db_operations import create_db
 """
 
 def create_app(config_name):
-    """Application factory that returns a fully formed instance of the app
+    """
+    Application factory that returns a fully formed instance of the app
 
     The application context doesn't exist when this file is running, so 
     instead of being able to access values defined in the file config.py 
@@ -66,9 +67,8 @@ def create_app(config_name):
               user_facing_id VARCHAR(32),
               title TEXT,
               description TEXT,
-              status INTEGER DEFAULT(0) -- 0: active, 1: disabled, 2: reserved for future use
+              status INTEGER DEFAULT 0 -- 0: active, 1: disabled, 2: reserved for future use
             );
-
             CREATE TABLE IF NOT EXISTS assets(
                 filename TEXT NOT NULL,
                 create_date TEXT NOT NULL,
@@ -77,15 +77,22 @@ def create_app(config_name):
                 event_id TEXT NOT NULL,
                 size INT NOT NULL,
                 etag TEXT NOT NULL,
-                FOREIGN KEY(event_id) REFERENCES 
-            )
+                FOREIGN KEY(event_id) REFERENCES events(id)
+            );
         """)
         db.commit()
         db.close()
-    except:
-        print("Database already exists!")
+    except Exception as e:
+        print("Database creation error!")
+        print(e)
 
     from app.landing import landing_bp
     app.register_blueprint(landing_bp)
+
+    @app.teardown_appcontext
+    def close_connection(exception):
+        db = getattr(g, '_database', None)
+        if db is not None:
+            db.close()
 
     return app
