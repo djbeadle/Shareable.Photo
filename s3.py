@@ -17,10 +17,6 @@ S3_CLIENT = boto3.client(
     aws_secret_access_key=_current_config.AWS_SECRET_ACCESS_KEY
 )
 
-def process_sns(msg, tstamp):
-    print(msg)
-    # do stuff here, like calling your favorite SMS gateway API
-
 def generate_presigned_post(filename, type):
     """
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.generate_presigned_post

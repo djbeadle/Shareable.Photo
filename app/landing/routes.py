@@ -6,7 +6,7 @@ from app.landing import landing_bp
 import json, urllib
 from datetime import datetime
 
-from s3 import generate_presigned_post, process_sns
+from s3 import generate_presigned_post, record_upload
 
 @landing_bp.route('/', methods=['GET'])
 def home():
@@ -51,7 +51,47 @@ def get_event(user_facing_id: str):
 
 @landing_bp.route('/s3_upload_callback', methods = ['GET', 'POST', 'PUT'])
 def sns():
+    # TODO-Daniel: Verify Signature from Amazon to prevent malicious
+    """
+       [
+            {
+                "eventVersion" : "2.1",
+                "eventSource" : "aws:s3",
+                "awsRegion" : "us-east-1",
+                "eventTime" : "2022-01-12T18:13:40.260Z",
+                "eventName" : "ObjectCreated:Post",
+                "userIdentity" : {
+                    "principalId" : "AWS:AIDAUZYMYSEH2T565DTFL"
+                },
+                "requestParameters" : {
+                     "sourceIPAddress" : "151.205.187.56"
+                },
+                "responseElements" : {
+                    "x-amz-request-id" : "Q632NM5SXJZE1DZY",
+                    "x-amz-id-2" : "ygP97z1gE22xNh57jCt6ypnlEMi8Ab3PbiwAh+wO9TKQpCDCRdLk1et/7+C3L4vphMxV8Pr9rRwUuWP0BG1Nrq/NYPmyRjFy"
+                },
+                "s3" : {
+                    "s3SchemaVersion" : "1.0",
+                    "configurationId" : "Eventfire Upload",
+                    "bucket" : {
+                        "name" : "eventfire",
+                        "ownerIdentity" : {
+                        "principalId" : "A1N3DD51J9UNG7"
+                        },
+                        "arn" : "arn:aws:s3:::eventfire"
+                    },
+                    "object" : {
+                        "key" : "96bf309f-e2db-4910-8e74-96580a2e0c4b/IMG_2605.jpeg",
+                        "size" : 480277,
+                        "eTag" : "47486c8fe6dc435934dfd323da7beaa5",
+                        "sequencer" : "0061DF1A541D57A6A0"
+                    }
+                }
+            }
+        ]
+    """
     # AWS sends JSON with text/plain mimetype
+    # TODO calculate e-tags client side and prevent duplicate uploads https://teppen.io/2018/06/23/aws_s3_etags/#what-is-an-s3-etag
     try:
         js = json.loads(request.data)
         print(json.dumps(js, indent=2))
@@ -66,7 +106,20 @@ def sns():
             print(f.read().decode('utf-8'))
 
     if hdr == 'Notification':
-        process_sns(js['Message'], js['Timestamp'])
+        print(js['Message'], js['Timestamp'])
+
+    msg = js['Message']
+    for r in msg['Records']:
+        folder, filename = r['object']['key'].split('/')
+        record_upload(
+            msg['filename'],
+            msg['eventName'],
+            msg['eventTime'],
+            msg['awsRegion'],
+            msg['requestParameters']['sourceIpAddress'],
+            msg['size'],
+            msg['etag']
+        )
 
     return 'OK\n'
 
@@ -86,3 +139,4 @@ def get_presigned_s3_upload_url(user_facing_id):
     x = generate_presigned_post(filename_with_folder, params['type'])
     x['fields']['key'] = filename_with_folder
     return json.dumps(x)
+

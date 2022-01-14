@@ -61,13 +61,24 @@ def create_app(config_name):
   
     try:
         cur.executescript("""
-            create table if not exists events(
-                id INTEGER PRIMARY KEY,
-                user_facing_id VARCHAR(32),
-                title TEXT,
-                description TEXT,
-                status INTEGER DEFAULT(0) -- 0: active, 1: disabled, 2: reserved for future use
+            CREATE TABLE IF NOT EXISTS events(
+              id INTEGER PRIMARY KEY,
+              user_facing_id VARCHAR(32),
+              title TEXT,
+              description TEXT,
+              status INTEGER DEFAULT(0) -- 0: active, 1: disabled, 2: reserved for future use
             );
+
+            CREATE TABLE IF NOT EXISTS assets(
+                filename TEXT NOT NULL,
+                create_date TEXT NOT NULL,
+                aws_region TEXT NOT NULL,
+                uploader_ip TEXT NOT NULL,
+                event_id TEXT NOT NULL,
+                size INT NOT NULL,
+                etag TEXT NOT NULL,
+                FOREIGN KEY(event_id) REFERENCES 
+            )
         """)
         db.commit()
         db.close()

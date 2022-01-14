@@ -1,5 +1,20 @@
 import sqlite3, uuid, json
-from flask import current_app
+from flask import current_app, g
+
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(current_app.config['DB_NAME'])
+    return db
+
+
+@current_app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
 
 def list_all_events():
     db = sqlite3.connect(current_app.config['DB_NAME'])
@@ -26,6 +41,7 @@ def get_event_info(user_facing_id):
     except Exception as e:
         print(f'An error occurred fetching event "{user_facing_id}"')
 
+
 def create_event(title: str, description: str, status=0):
     db = sqlite3.connect(current_app.config['DB_NAME'])
     cur = db.cursor()
@@ -40,4 +56,13 @@ def create_event(title: str, description: str, status=0):
         return user_facing_id
     except Exception as e:
         print(f'An error occurred while trying to insert event "{title}" in to "{ current_app.config["DB_NAME"] }".')
+        print(e)
+
+
+def record_upload(filename, eventName, eventTime, awsRegion, sourceIp,  size, etag):
+    try:
+        cur = get_db().cursor()
+        cur.execute("INSERT INTO assets(filename, create_date, aws_region, uploader_ip, event_id, size, etag, event_id) values (?,?,?,?,?,?,?,?);")
+    except Exception as e:
+        print(f'An error occurred while trying to insert {filename} into the assets table.')
         print(e)
