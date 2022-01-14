@@ -3,7 +3,16 @@
 {% block content %}
 {{ content }}
 <br>
+<br>
 Number of files: {{asset_count}}
 <br>
-<img src="{{ url_for('static', filename='kitten.jpg') }}">
+<br>
+<ul>
+    {% for image in images %}
+    <li>
+        <img style="max-width: 400px; max-height: 200px" src="{{image}}">
+    </li>
+    {% endfor %}
+</ul>
+
 {% endblock %}

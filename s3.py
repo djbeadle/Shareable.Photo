@@ -39,8 +39,7 @@ def generate_presigned_post(filename, type):
     )
 
 
-
-def create_presigned_url(bucket_name: str, object_name: str, expiration=30):
+def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire"):
     """
     Generate a presigned URL to share an S3 object
 
@@ -49,6 +48,8 @@ def create_presigned_url(bucket_name: str, object_name: str, expiration=30):
     :param expiration: Time in seconds for the presigned URL to remain valid
     :return: Presigned URL as string. If error, returns None.
     """
+
+    print(object_name)
 
     # Generate a presigned URL for the S3 object
     try:
@@ -61,7 +62,7 @@ def create_presigned_url(bucket_name: str, object_name: str, expiration=30):
             ExpiresIn=expiration
         )
 
-    except ClientError as e:
+    except Exception as e:
         logging.error(e)
         return None
 

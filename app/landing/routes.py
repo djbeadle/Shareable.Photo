@@ -1,12 +1,12 @@
 from uuid import uuid4, UUID
 from flask import render_template, request, current_app, Response
-from db_operations import create_event, get_event_info, list_all_events, record_upload, event_asset_count
+from db_operations import create_event, get_event_info, list_all_events, record_upload, event_asset_count, get_images
 from app.landing import landing_bp
 
 import json, urllib
 from datetime import datetime
 
-from s3 import generate_presigned_post
+from s3 import generate_presigned_post, create_presigned_url
 
 @landing_bp.route('/', methods=['GET'])
 def home():
@@ -43,9 +43,13 @@ def list_events():
 
 @landing_bp.route('/get_event/<user_facing_id>', methods=['GET'])
 def get_event(user_facing_id: str):
+    event_images = list(get_images(user_facing_id))
+    
+    # TODO-Daniel: Add support for images with spaces in the filename
     return render_template(
         'info.html',
         asset_count=event_asset_count(user_facing_id),
+        images=[create_presigned_url(f'{user_facing_id}/{x[0]}') for x in event_images],
         content=f'{get_event_info(user_facing_id)}'
     )
 

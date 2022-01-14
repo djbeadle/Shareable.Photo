@@ -65,11 +65,18 @@ def record_upload(filename, eventName, eventTime, awsRegion, sourceIp,  size, et
         print(f'An error occurred while trying to insert {filename} into the assets table.')
         print(e)
 
+
 def event_asset_count(event_id: str):
     db = get_db()
     cur = db.cursor()
 
-    print(event_id)
     cur.execute("SELECT count(filename) FROM assets WHERE event_id=?;", [event_id])
     return cur.fetchone()[0]
 
+
+def get_images(event_id: str):
+    db = get_db()
+    cur = db.cursor()
+
+    cur.execute("SELECT filename FROM assets WHERE event_id = ?", [event_id])
+    return cur.fetchall()
