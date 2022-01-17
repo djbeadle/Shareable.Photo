@@ -1,5 +1,67 @@
 {% extends 'base.html' %}
 
+{% block extra_styles %}
+dd {
+    font-style: italic;
+}
+{% endblock %}
+
 {% block content %}
-{{ content }}
+<p>
+    Eventfire is a platform that makes collecting high-quality photos, video, and other media from event participants incredibly easy!
+    <ol>
+        <li>Sign up for a free <a href="/login">event manager account</a></li>
+        <li>Pay for a new event with the amount of storage you need <i>(see prices below)</i></li>
+        <li>Share the upload link with your users—users can only upload media.</li>
+        <li>Download all of the aggregated media</li>
+    </ol>
+</p>
+
+<hr>
+
+<h2>Pricing</h2>
+<i>#TODO-Daniel: Payment method logos (specifically Apple Pay)</i>
+<p>
+    <h3>Small Events</h3>
+    $5 for 5 GB of media storage for 5 days. Media can be uploaded for 5 days and is then available for download by the event manager for 5 additional days.
+</p>
+<p>
+    <h3>Medium Events</h3>
+    $10 for 10 GB of media storage for 10 days. Media can be uploaded for 10 days and is then available for download by the event manager for 10 additional days.
+</p>
+<p>
+    <h3>Larger or Custom Conditions</h3> 
+    Please contact <a href="mailto:fake_address@eventfire.club">fake_address@eventfire.club</a> for custom pricing.
+</p>
+
+<hr>
+
+<h2>Features</h2>
+<p>
+    <ul>
+        <li>Upload from any device iPhone, Android, desktop, and more!</li>
+        <li>Files aren't compressed and image metadata is preserved</li>
+        <li>Most commonly supported image and video formats are supported by default<i>(.jpg, .png, .mp4, .mov, etc)</i>. Uncommon filetypes can be supported upon request.</li>
+        <li>Due to limitations in iOS Live Photos <i>(.heic)</i> from Apple mobile devices will be converted to still JPG files before upload when being uploaded from the Camera Roll.</li>
+    </ul>
+</p>
+
+<hr>
+
+<h2>F.A.Q.</h2>
+<p>
+    <dl>
+        <dt>Is uploaded media encrypted?</dt>
+        <dd><b>No.</b> System administrators can view uploaded media to prevent abuse of this service.</dd>
+
+        <dt>Are uploaders anonymous?</dt>
+        <dd>Uploaders do not have to create an account to upload media but IP addresses are logged.</dd>
+
+        <dt>Who owns the copyright of uploaded images?</dt>
+        <dd>Eventfire does not claim any ownership to uploaded iamges.#TODO-Danel: Lawyer up.</dd>
+    </dl>
+</p>
+
+<h2>Demo</h2>
+<p>Interested in a demo? Contact <a href="mailto:fake_address@eventfire.club">fake_address@eventfire.club</a> <i>(TODO-Daniel: Create real email)</i>.</p>
 {% endblock %}

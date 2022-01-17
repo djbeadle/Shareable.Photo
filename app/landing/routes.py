@@ -27,14 +27,15 @@ def inject_user():
 
 @landing_bp.route('/')
 def home():
-    text = 'This is the landing route!'
-    return render_template('landing.html', content=text)
+    return render_template('landing.html')
 
 @landing_bp.route('/uploader/<user_facing_id>')
 def upload(user_facing_id):
+    event_info = get_event_info(user_facing_id)
     return render_template(
         'uploader.html',
-        user_facing_id=user_facing_id
+        user_facing_id=user_facing_id,
+        custom_title=event_info[1]
     )
 
 @landing_bp.route('/create_event')

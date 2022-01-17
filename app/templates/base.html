@@ -1,33 +1,46 @@
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width">
-    <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.css'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
 
-    <styles>
+    <style>
+        .nav-button {
+            border: 1px solid black;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
         {% block extra_styles %}
         {% endblock %}
-    </styles>
+    </style>
 </head>
 <body>
     <nav>
         <div>
-            <div style="display: flex; flex-direction: row; justify-content: space-between; border-bottom: 1px solid black">
-                <div style="display: flex; flex-direction: row;">
-                    <div>
-                        <h1>Eventfire Manager</h1>
-                        <a href="/events">Events</a>
-                        <a href="/create_event">Create</a>
-                    </div>
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding-bottom: 4px; margin-bottom:8px;">
+                <div>
+                    {% if custom_title is defined %}
+                    <h1>{{ custom_title }}</h1>
+                    {% else %}
+                    <h1>Eventfire</h1>
+                    {% endif %}
                 </div>
-                
-                {% if user_info is defined %}
-                <div style="margin-left: auto;">
-                    <a href="/dashboard">{{ user_info['name'] }}</a>
+                {% if user_info['name'] is defined %}
+                <div>
+                    <a class="nav-button" href="/events">My Events</a>
+                    <a class="nav-button" href="/create_event">Create New Event</a>
+                </div>
+                <div style="text-align:right;">
+                    {{ user_info['name'] }}<br>
+                    <a href="/logout">Logout</a>
+                </div>
+                {% else %}
+                <div class="nav-button" style="text-align: center;">
+                    <a href="/login">Event <br>Manager Login</a>
                 </div>
                 {% endif %}
-
             </div>
-            
+            <hr>
         </div>
     </nav>
 {% block content %}
