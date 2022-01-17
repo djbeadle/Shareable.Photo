@@ -10,10 +10,26 @@
 </head>
 <body>
     <nav>
-        <a href="/events">Events</a>
-        <a href="/create_event">Create</a>
+        <div>
+            <div style="display: flex; flex-direction: row; justify-content: space-between; border-bottom: 1px solid black">
+                <div style="display: flex; flex-direction: row;">
+                    <div>
+                        <h1>Eventfire Manager</h1>
+                        <a href="/events">Events</a>
+                        <a href="/create_event">Create</a>
+                    </div>
+                </div>
+                
+                {% if user_info is defined %}
+                <div style="margin-left: auto;">
+                    <a href="/dashboard">{{ user_info['name'] }}</a>
+                </div>
+                {% endif %}
+
+            </div>
+            
+        </div>
     </nav>
-<h1>{{ config['APP_NAME'] }}</h1>
 {% block content %}
 {% endblock %}
 

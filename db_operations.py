@@ -1,6 +1,6 @@
 import sqlite3, uuid, json
 from flask import current_app, g
-
+from typing import Union
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -22,7 +22,21 @@ def list_all_events():
     except Exception as e:
         print("An error occurred fetching all of the events.")
         print(e)
-    
+
+
+def list_users_events(owner_user_email):
+    db = sqlite3.connect(current_app.config['DB_NAME'])
+    cur = db.cursor()
+  
+    try:
+        cur.execute("SELECT user_facing_id, title, description, status FROM events WHERE owner_user_email = ?;", [owner_user_email])
+        rows = cur.fetchall()
+        db.commit()
+        db.close()
+        return rows
+    except Exception as e:
+        print("An error occurred fetching all of the events.")
+        print(e)
 
 def get_event_info(user_facing_id):
     db = sqlite3.connect(current_app.config['DB_NAME'])
@@ -35,13 +49,16 @@ def get_event_info(user_facing_id):
         print(f'An error occurred fetching event "{user_facing_id}"')
 
 
-def create_event(title: str, description: str, status=0):
+def create_event(title: str, description: str, creator_user_id: str, status=0):
     db = sqlite3.connect(current_app.config['DB_NAME'])
     cur = db.cursor()
   
     try:
         user_facing_id = uuid.uuid4()
-        cur.execute("INSERT INTO events(user_facing_id, title, description, status) values (?, ?, ?, ?);", (str(user_facing_id), title, description, status))
+        cur.execute(
+            "INSERT INTO events(user_facing_id, title, description, status, owner_user_id) values (?, ?, ?, ?, ?);",
+            [str(user_facing_id), title, description, status, creator_user_id]
+        )
 
         db.commit()
         db.close()
@@ -63,6 +80,32 @@ def record_upload(filename, eventName, eventTime, awsRegion, sourceIp,  size, et
         db.commit()
     except Exception as e:
         print(f'An error occurred while trying to insert {filename} into the assets table.')
+        print(e)
+
+
+def get_user(user_id: str):
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute("SELECT user_id, email, email_verified FROM users WHERE user_id = ?", [user_id])
+
+        return cur.fetchone()
+    except Exception as e:
+        print(f'An error occurred while trying to retrieve user {user_id}.')
+        print(e)
+
+
+def insert_user(user_id, email):
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute(
+            "INSERT INTO users (user_id, email) VALUES (?, ?);",
+            [user_id, email]
+        )
+        db.commit()
+    except Exception as e:
+        print(f'An error occurred while trying to insert {user_id} into the users table.')
         print(e)
 
 

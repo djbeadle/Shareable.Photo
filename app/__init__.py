@@ -1,10 +1,8 @@
 from flask import Flask, g
 import sqlite3
-from flask_login import LoginManager
+from authlib.integrations.flask_client import OAuth
 
 # Good app factory example: https://hackersandslackers.com/flask-login-user-authentication
-
-login_manager = LoginManager()
 
 try:
   from config import config, DevelopmentConfig, ProductionConfig
@@ -13,6 +11,9 @@ except ModuleNotFoundError as e:
   print('ERROR: You forgot to make a copy of the "config-example.py" file called "config.py"')
   print('       Your application will NOT work until you do so.')
   print('')
+
+
+oauth = OAuth()
 
 """
 If you have another file in this directory and want to import it you must
@@ -64,8 +65,20 @@ def create_app(config_name):
             
     db = sqlite3.connect(config[config_name].DB_NAME)
     cur = db.cursor()
-    login_manager.init_app(app)
-  
+    
+    oauth.init_app(app)
+    app.auth0 = oauth.register(
+        'auth0',
+        client_id='TRuQsy4uFa27xxcuEDZDnxvFEWlwctPb',
+        client_secret=config[config_name].AUTHY_CLIENT_SECRET,
+        api_base_url='https://ceaseless-watcher.us.auth0.com',
+        access_token_url='https://ceaseless-watcher.us.auth0.com/oauth/token',
+        authorize_url='https://ceaseless-watcher.us.auth0.com/authorize',
+        client_kwargs={
+            'scope': 'openid profile email',
+        },
+    )
+
     try:
         cur.executescript("""
             CREATE TABLE IF NOT EXISTS events(
@@ -73,8 +86,15 @@ def create_app(config_name):
               user_facing_id VARCHAR(32),
               title TEXT,
               description TEXT,
-              status INTEGER DEFAULT 0 -- 0: active, 1: disabled, 2: reserved for future use
+              status INTEGER DEFAULT 0, -- 0: active, 1: disabled, 2: reserved for future use
+              owner_user_id TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS users(
+                user_id TEXT PRIMARY KEY,
+                email TEXT NOT NULL
+            );
+            
             CREATE TABLE IF NOT EXISTS assets(
                 filename TEXT NOT NULL,
                 create_date TEXT NOT NULL,
@@ -94,6 +114,8 @@ def create_app(config_name):
 
     from app.landing import landing_bp
     app.register_blueprint(landing_bp)
+    from app.auth import auth_bp
+    app.register_blueprint(auth_bp)
 
     @app.teardown_appcontext
     def close_connection(exception):

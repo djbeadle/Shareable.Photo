@@ -1,14 +1,31 @@
-from uuid import uuid4, UUID
-from flask import render_template, request, current_app, Response
+from uuid import UUID
+from flask import render_template, request, Response, session, redirect, url_for
 from db_operations import create_event, get_event_info, list_all_events, record_upload, event_asset_count, get_images
 from app.landing import landing_bp
+from app.toolbox import requires_auth
+
 
 import json, urllib
 from datetime import datetime
 
+
 from s3 import generate_presigned_post, create_presigned_url
 
-@landing_bp.route('/', methods=['GET'])
+
+@landing_bp.context_processor
+def inject_user():
+    """
+    Always inject the user info if the user is signed in so we don't have to do it every time.
+
+    https://stackoverflow.com/a/26498865
+    """
+    if session.get('profile'):
+        return dict(user_info=session['profile'])
+    else:
+        return dict(user_info={})
+
+
+@landing_bp.route('/')
 def home():
     text = 'This is the landing route!'
     return render_template('landing.html', content=text)
@@ -21,13 +38,18 @@ def upload(user_facing_id):
     )
 
 @landing_bp.route('/create_event')
+@requires_auth
 def create_form():
     return render_template('create_event.html')
 
 
 @landing_bp.route('/create_event', methods=['POST'])
+@requires_auth
 def create_submit():
-    new_event_user_facing_id = create_event(request.form['title'], request.form['description'])
+    new_event_user_facing_id = create_event(request.form['title'], request.form['description'], session['jwt_payload']['sub'])
+    
+    return redirect(f'{url_for("landing_bp.get_event", user_facing_id=new_event_user_facing_id)}')
+    
     return render_template(
         'info.html',
         content=f'New event created with id {new_event_user_facing_id}. {get_event_info(new_event_user_facing_id)}.'
@@ -146,7 +168,3 @@ def get_presigned_s3_upload_url(user_facing_id):
     x = generate_presigned_post(filename_with_folder, params['type'])
     x['fields']['key'] = filename_with_folder
     return json.dumps(x)
-
-@landing_bp.route('/google_callback/')
-def google_callback():
-    pass
