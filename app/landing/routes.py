@@ -70,6 +70,10 @@ def list_events():
 @landing_bp.route('/get_event/<user_facing_id>', methods=['GET'])
 @requires_auth
 def get_event(user_facing_id: str):
+    x = get_event_info(user_facing_id)
+    if x is None or x[4] != session['jwt_payload']['sub']:
+        return Response({"error": "Event not found."}, status=404, mimetype="application/json")
+
     event_images = [create_presigned_url(f'{user_facing_id}/{x[0]}') for x in list(get_images(user_facing_id))]
     
     return render_template(
