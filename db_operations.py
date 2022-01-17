@@ -29,7 +29,7 @@ def list_users_events(owner_user_email):
     cur = db.cursor()
   
     try:
-        cur.execute("SELECT user_facing_id, title, description, status FROM events WHERE owner_user_email = ?;", [owner_user_email])
+        cur.execute("SELECT user_facing_id, title, description, status FROM events WHERE owner_user_id = ?;", [owner_user_email])
         rows = cur.fetchall()
         db.commit()
         db.close()

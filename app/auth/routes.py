@@ -18,7 +18,7 @@ def dashboard():
 
 @auth_bp.route('/login')
 def login():
-    return current_app.auth0.authorize_redirect(redirect_uri='http://localhost:5000/authy_callback')
+    return current_app.auth0.authorize_redirect(redirect_uri=url_for('.callback_handling', _external=True))
 
 
 # Here we're using the /callback route.

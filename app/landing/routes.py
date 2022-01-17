@@ -1,6 +1,6 @@
 from uuid import UUID
 from flask import render_template, request, Response, session, redirect, url_for
-from db_operations import create_event, get_event_info, list_all_events, record_upload, event_asset_count, get_images
+from db_operations import create_event, get_event_info, list_all_events, list_users_events, record_upload, event_asset_count, get_images
 from app.landing import landing_bp
 from app.toolbox import requires_auth
 
@@ -57,14 +57,16 @@ def create_submit():
 
 
 @landing_bp.route('/events')
+@requires_auth
 def list_events():
     return render_template(
         'list_events.html',
-        events=list_all_events()
+        events=list_users_events(session['jwt_payload']['sub'])
     )
 
 
 @landing_bp.route('/get_event/<user_facing_id>', methods=['GET'])
+@requires_auth
 def get_event(user_facing_id: str):
     event_images = [create_presigned_url(f'{user_facing_id}/{x[0]}') for x in list(get_images(user_facing_id))]
     
