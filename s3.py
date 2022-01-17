@@ -49,6 +49,7 @@ def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire
     :return: Presigned URL as string. If error, returns None.
     """
 
+    print("")
     print(object_name)
 
     # Generate a presigned URL for the S3 object
@@ -57,7 +58,7 @@ def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire
             'get_object',
             Params={
                 'Bucket': bucket_name,
-                'Key': object_name
+                'Key': object_name.replace("+", " ")
             },
             ExpiresIn=expiration
         )

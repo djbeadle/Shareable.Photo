@@ -30,7 +30,7 @@ def get_event_info(user_facing_id):
 
     try:
         cur.execute("SELECT user_facing_id, title, description, status FROM events WHERE user_facing_id = ?;", (user_facing_id, ))
-        return json.dumps(cur.fetchone())
+        return cur.fetchone()
     except Exception as e:
         print(f'An error occurred fetching event "{user_facing_id}"')
 

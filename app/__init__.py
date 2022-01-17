@@ -1,5 +1,10 @@
-from flask import Flask, Blueprint, g
-import sqlite3, uuid
+from flask import Flask, g
+import sqlite3
+from flask_login import LoginManager
+
+# Good app factory example: https://hackersandslackers.com/flask-login-user-authentication
+
+login_manager = LoginManager()
 
 try:
   from config import config, DevelopmentConfig, ProductionConfig
@@ -59,6 +64,7 @@ def create_app(config_name):
             
     db = sqlite3.connect(config[config_name].DB_NAME)
     cur = db.cursor()
+    login_manager.init_app(app)
   
     try:
         cur.executescript("""

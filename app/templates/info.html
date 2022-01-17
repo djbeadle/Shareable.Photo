@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{{ content }}
+<h2>{{ content[1] }}</h2>
+<h3>{{ content[2] }}</h3>
+<a href="/uploader/{{ content[0] }}">Upload!</a>
 <br>
 <br>
 Number of files: {{asset_count}}

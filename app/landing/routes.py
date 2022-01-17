@@ -33,6 +33,7 @@ def create_submit():
         content=f'New event created with id {new_event_user_facing_id}. {get_event_info(new_event_user_facing_id)}.'
     )
 
+
 @landing_bp.route('/events')
 def list_events():
     return render_template(
@@ -43,14 +44,13 @@ def list_events():
 
 @landing_bp.route('/get_event/<user_facing_id>', methods=['GET'])
 def get_event(user_facing_id: str):
-    event_images = list(get_images(user_facing_id))
+    event_images = [create_presigned_url(f'{user_facing_id}/{x[0]}') for x in list(get_images(user_facing_id))]
     
-    # TODO-Daniel: Add support for images with spaces in the filename
     return render_template(
         'info.html',
         asset_count=event_asset_count(user_facing_id),
-        images=[create_presigned_url(f'{user_facing_id}/{x[0]}') for x in event_images],
-        content=f'{get_event_info(user_facing_id)}'
+        images=event_images,
+        content=get_event_info(user_facing_id)
     )
 
 
@@ -140,9 +140,13 @@ def get_presigned_s3_upload_url(user_facing_id):
         return Response({"error": "Now just hold on a minute, bucko."}, status=400, mimetype="application/json")
 
     params = request.args
-    filename_with_folder = f'{user_facing_id}/{params["filename"]}'
+    # Due to issues with how S3 encodes plus signs I'm just going to replace them with spaces for now.
+    filename_with_folder = f'{user_facing_id}/{params["filename"].replace("+", " ")}'
 
     x = generate_presigned_post(filename_with_folder, params['type'])
     x['fields']['key'] = filename_with_folder
     return json.dumps(x)
 
+@landing_bp.route('/google_callback/')
+def google_callback():
+    pass
