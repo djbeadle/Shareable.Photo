@@ -35,7 +35,8 @@ def upload(user_facing_id):
     return render_template(
         'uploader.html',
         user_facing_id=user_facing_id,
-        custom_title=event_info[1]
+        custom_title=event_info[1],
+        event_description=event_info[2]
     )
 
 @landing_bp.route('/create_event')

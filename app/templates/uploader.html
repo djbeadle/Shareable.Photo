@@ -5,34 +5,35 @@
 {% endblock %}
 
 {% block content %}
+<blockquote>{{ event_description }}</blockquote>
+
 <div id="drag-drop-area"></div>
 
 <a href="/get_event/{{user_facing_id}}">Gallery</a>
-<h1>NOTE: Files are not encrypted and can be viewed by system administrators.</h1>
-<div><h2>News</h2>
-    <ul><li>Eventfire.club has now raised $3 million dollars in first round seed funding!</li></ul></div>
+<h3>NOTE: Files are not encrypted and can be viewed by system administrators.</h3>
+
 <script src="https://releases.transloadit.com/uppy/v2.3.2/uppy.min.js"></script>
 <script>
     const { AwsS3 } = window.Uppy;
 
     var uppy = new Uppy.Core(
-    {
-        restrictions: {
-            allowedFileTypes: ['.jpg', '.JPG', '.jpeg', '.JPEG', '.heic', '.heif', '.png', '.PNG', '.mov', '.MOV', 'mp4', 'MP4'],
-        },
-    })
-    .use(Uppy.Dashboard, {
-        inline: true,
-        target: '#drag-drop-area',
-    })
-    .use(AwsS3, {
-        limit: 2,
-        timeout: 60000, // 1 minute
-        companionUrl: '/{{user_facing_id}}/'
-    })
+        {
+            restrictions: {
+                allowedFileTypes: ['.jpg', '.JPG', '.jpeg', '.JPEG', '.heic', '.heif', '.png', '.PNG', '.mov', '.MOV', 'mp4', 'MP4'],
+            },
+        })
+        .use(Uppy.Dashboard, {
+            inline: true,
+            target: '#drag-drop-area',
+        })
+        .use(AwsS3, {
+            limit: 2,
+            timeout: 60000, // 1 minute
+            companionUrl: '/{{user_facing_id}}/'
+        })
 
     uppy.on('complete', (result) => {
-    console.log('Upload complete! We’ve uploaded these files:', result.successful)
+        console.log('Upload complete! We’ve uploaded these files:', result.successful)
     })
 </script>
 {% endblock %}

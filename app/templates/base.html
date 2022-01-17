@@ -8,7 +8,13 @@
             border: 1px solid black;
             padding: 8px 12px;
             border-radius: 4px;
-            margin-right: 8px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 8px;
+        }
+
+        #navbar {
+            display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding-bottom: 4px; margin-bottom:8px;
         }
         {% block extra_styles %}
         {% endblock %}
@@ -17,7 +23,7 @@
 <body>
     <nav>
         <div>
-            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding-bottom: 4px; margin-bottom:8px;">
+            <div id="navbar">
                 <div>
                     {% if custom_title is defined %}
                     <h1>{{ custom_title }}</h1>
@@ -26,7 +32,7 @@
                     {% endif %}
                 </div>
                 {% if user_info['name'] is defined %}
-                <div>
+                <div style="display: flex; flex-direction:column; flex-wrap: wrap;">
                     <a class="nav-button" href="/events">My Events</a>
                     <a class="nav-button" href="/create_event">Create New Event</a>
                 </div>

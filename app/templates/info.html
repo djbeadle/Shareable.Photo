@@ -2,19 +2,20 @@
 
 {% block content %}
 <h2>{{ content[1] }}</h2>
-<h3>{{ content[2] }}</h3>
 <a href="/uploader/{{ content[0] }}">Upload!</a>
 <br>
 <br>
-Number of files: {{asset_count}}
-<br>
-<br>
 <ul>
+    {% if asset_count == 0 %}
+    <p>Nothing has been uploaded yet!</p>
+    {% else %}
+    Number of files: {{asset_count}}
     {% for image in images %}
     <li>
-        <img style="max-width: 400px; max-height: 200px" src="{{image}}">
+        <img style="max-width: 100%; max-height: 200px" src="{{image}}">
     </li>
     {% endfor %}
+    {% endif %}
 </ul>
 
 {% endblock %}
