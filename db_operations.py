@@ -87,7 +87,7 @@ def get_user(user_id: str):
     try:
         db = get_db()
         cur = db.cursor()
-        cur.execute("SELECT user_id, email, email_verified FROM users WHERE user_id = ?", [user_id])
+        cur.execute("SELECT user_id, email FROM users WHERE user_id = ?", [user_id])
 
         return cur.fetchone()
     except Exception as e:

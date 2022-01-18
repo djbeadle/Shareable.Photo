@@ -1,6 +1,6 @@
 from uuid import UUID
-from flask import render_template, request, Response, session, redirect, url_for
-from db_operations import create_event, get_event_info, list_all_events, list_users_events, record_upload, event_asset_count, get_images
+from flask import render_template, request, Response, session, redirect, url_for, current_app
+from db_operations import create_event, get_event_info, list_users_events, record_upload, event_asset_count, get_images
 from app.landing import landing_bp
 from app.toolbox import requires_auth
 
@@ -51,11 +51,6 @@ def create_submit():
     new_event_user_facing_id = create_event(request.form['title'], request.form['description'], session['jwt_payload']['sub'])
     
     return redirect(f'{url_for("landing_bp.get_event", user_facing_id=new_event_user_facing_id)}')
-    
-    return render_template(
-        'info.html',
-        content=f'New event created with id {new_event_user_facing_id}. {get_event_info(new_event_user_facing_id)}.'
-    )
 
 
 @landing_bp.route('/events')
@@ -70,9 +65,11 @@ def list_events():
 @landing_bp.route('/get_event/<user_facing_id>', methods=['GET'])
 @requires_auth
 def get_event(user_facing_id: str):
+    current_user = session['jwt_payload']['sub']
     x = get_event_info(user_facing_id)
-    if x is None or x[4] != session['jwt_payload']['sub']:
-        return Response({"error": "Event not found."}, status=404, mimetype="application/json")
+    # Warning: Admin can view all events!
+    if x is None or (x[4] != current_user and current_user != current_app.config['ADMIN_ID']):
+        return Response(f'Either this event does not exist or you are not authorized to view its gallery. Try logging in at {url_for("auth_bp.login", _external=True)}', status=404)
 
     event_images = [create_presigned_url(f'{user_facing_id}/{x[0]}') for x in list(get_images(user_facing_id))]
     
@@ -129,7 +126,6 @@ def sns():
     # TODO calculate e-tags client side and prevent duplicate uploads https://teppen.io/2018/06/23/aws_s3_etags/#what-is-an-s3-etag
     try:
         js = json.loads(request.data)
-        print(json.dumps(js, indent=2))
     except:
         pass
 
@@ -140,8 +136,8 @@ def sns():
         with urllib.request.urlopen(js['SubscribeURL']) as f:
             print(f.read().decode('utf-8'))
 
-    if hdr == 'Notification':
-        print(js['Message'], js['Timestamp'])
+    # if hdr == 'Notification':
+    #    print(js['Message'], js['Timestamp'])
 
     msg = js['Message']
     for r in json.loads(msg)['Records']:

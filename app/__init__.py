@@ -114,8 +114,12 @@ def create_app(config_name):
 
     from app.landing import landing_bp
     app.register_blueprint(landing_bp)
+    
     from app.auth import auth_bp
     app.register_blueprint(auth_bp)
+
+    from app.manage import manage_bp
+    app.register_blueprint(manage_bp)
 
     @app.teardown_appcontext
     def close_connection(exception):
