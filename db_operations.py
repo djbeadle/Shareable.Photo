@@ -139,3 +139,19 @@ def get_images(event_id: str):
 
     cur.execute("SELECT filename FROM assets WHERE event_id = ?", [event_id])
     return cur.fetchall()
+
+def get_next_asset_id(event_id: str):
+    """
+    Each file that is attempted to be uploaded is given a unique ID to ensure files with duplicate names do not overwrite each other.
+    """
+    db = get_db()
+    cur = db.cursor()
+
+    cur.execute("BEGIN;")
+    cur.execute("UPDATE `events` SET `asset_id` = `asset_id`+1 WHERE `user_facing_id` = ?;", [event_id])
+    cur.execute('SELECT `asset_id` - 1 FROM events WHERE `user_facing_id` = ?;', [event_id])
+    x = cur.fetchone()
+    cur.execute('COMMIT;')
+    
+    print(x)
+    return x

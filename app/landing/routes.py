@@ -1,6 +1,6 @@
 from uuid import UUID
 from flask import render_template, request, Response, session, redirect, url_for, current_app
-from db_operations import create_event, get_event_info, list_users_events, record_upload, event_asset_count, get_images
+from db_operations import create_event, get_event_info, list_users_events, record_upload, event_asset_count, get_images, get_next_asset_id
 from app.landing import landing_bp
 from app.toolbox import requires_auth
 
@@ -167,7 +167,7 @@ def get_presigned_s3_upload_url(user_facing_id):
 
     params = request.args
     # Due to issues with how S3 encodes plus signs I'm just going to replace them with spaces for now.
-    filename_with_folder = f'{user_facing_id}/{params["filename"].replace("+", " ")}'
+    filename_with_folder = f'{user_facing_id}/{get_next_asset_id(user_facing_id)[0]}_{params["filename"].replace("+", " ")}'
 
     x = generate_presigned_post(filename_with_folder, params['type'])
     x['fields']['key'] = filename_with_folder
