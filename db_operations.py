@@ -14,7 +14,11 @@ def list_all_events():
     cur = db.cursor()
   
     try:
-        cur.execute("SELECT user_facing_id, title, description, status FROM events;")
+        cur.execute("""
+            SELECT user_facing_id, title, description, status, event_total
+            FROM events
+            LEFT JOIN (SELECT event_id, Sum(size) AS event_total FROM assets GROUP BY event_id) AS a
+            ON events.user_facing_id = a.event_id""")
         rows = cur.fetchall()
         db.commit()
         db.close()
@@ -29,7 +33,19 @@ def list_users_events(owner_user_email):
     cur = db.cursor()
   
     try:
-        cur.execute("SELECT user_facing_id, title, description, status FROM events WHERE owner_user_id = ?;", [owner_user_email])
+        cur.execute(
+            """
+            SELECT  user_facing_id,
+                    title,
+                    description,
+                    status,
+                    event_total
+            FROM events
+            LEFT JOIN (SELECT event_id, Sum(size) AS event_total FROM assets GROUP BY event_id) AS a
+            ON events.user_facing_id = a.event_id
+            WHERE events.owner_user_id = ?
+            """, [owner_user_email])
+        
         rows = cur.fetchall()
         db.commit()
         db.close()

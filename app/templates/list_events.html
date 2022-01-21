@@ -6,6 +6,7 @@
 <li>
     <b><a href="/get_event/{{ event[0] }}">{{ event[1] }}</a></b><br>
     <i>"{{ event[2] }}"</i><br>
+    <p>Status: <b>{{event[3]}}</b> Size: <b>{{ ((event[4] or 0) / (1024*1024) ) | round }} mb </b></p>
     <a href="/uploader/{{ event[0] }}">Upload!</a>
 </li>
 {% endfor %}
