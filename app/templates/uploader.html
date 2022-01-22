@@ -14,7 +14,7 @@
             id="uploader_name"
             placeholder="Uploader's Name"
             default='anonymous'
-            oninput="uppy.setMeta({ 'uploader_name': document.getElementById('uploader_name').value });"
+            oninput="uppy.setMeta({ 'uploader-name': document.getElementById('uploader-name').value });"
             required
         >
     </label>
@@ -32,13 +32,13 @@
     let first_upload = true;
 
     function update_uploader_name_on_first_upload(){
-        let name = uppy.getState().meta['uploader_name'];
+        let name = uppy.getState().meta['uploader-name'];
         
         if (name === 'anonymous' && first_upload){
             name = prompt("Associate your name with these files? (Cancel to upload as anonymous)");
             if (name !== null){
-                uppy.setMeta({ 'uploader_name': name });
-                document.getElementById('uploader_name').value = name;
+                uppy.setMeta({ 'uploader-name': name });
+                document.getElementById('uploader-name').value = name;
             }
             else {
                 first_upload = false;
@@ -53,7 +53,7 @@
             },
             onBeforeUpload: () => { update_uploader_name_on_first_upload() },
             meta: {
-                'uploader-name': document.getElementById('uploader_name').value || "unknown"
+                'uploader-name': document.getElementById('uploader-name').value || "unknown"
             },
             debug: false
         })
