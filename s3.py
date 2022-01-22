@@ -17,7 +17,7 @@ S3_CLIENT = boto3.client(
     aws_secret_access_key=_current_config.AWS_SECRET_ACCESS_KEY
 )
 
-def generate_presigned_post(filename, type, fields, uploader_name):
+def generate_presigned_post(filename, type, fields):
     """
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.generate_presigned_post
 
@@ -37,11 +37,7 @@ def generate_presigned_post(filename, type, fields, uploader_name):
         _current_config.AWS_BUCKET_NAME,
         filename,
         fields,
-        [
-            {
-                'x-amz-meta-uploader-name': uploader_name
-            }
-        ]
+        [{k:v} for k,v in fields.items()]
     )
 
 
