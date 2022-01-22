@@ -27,12 +27,26 @@
 <script src="https://releases.transloadit.com/uppy/v2.3.2/uppy.min.js"></script>
 <script>
     const { AwsS3 } = window.Uppy;
+
+    window.onload = function(){
+        try {
+            last_name = document.cookie.split('; ').find(row => row.startsWith('name=')).split('=')[1];
+            document.getElementById('uploader-name').value = last_name;
+            uppy.setMeta({ 'uploader-name': document.getElementById('uploader-name').value });
+        }
+        catch (Error) {
+            pass;
+        }
+        
+        
+    }
     
     // The user doesn't want to identify themselves
     let first_upload = true;
 
     function update_uploader_name_on_first_upload(){
         let name = uppy.getState().meta['uploader-name'];
+        document.cookie=`name=${name}`;
         
         if (name === 'anonymous' && first_upload){
             name = prompt("Associate your name with these files? (Cancel to upload as anonymous)");
