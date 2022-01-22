@@ -158,17 +158,25 @@ def sns():
 
 @landing_bp.route('/<user_facing_id>/s3/params')
 def get_presigned_s3_upload_url(user_facing_id):
+    # https://github.com/transloadit/uppy/blob/main/packages/%40uppy/companion/src/server/controllers/s3.js
     # TODO-prod: Keep tracing of the user_facing_ids and validate if this is in the database. For now just see if it's a valid UUID
     try:
         current_user_facing_id = UUID(user_facing_id)
+        print(f'metadata: {json.dumps(request.args)}')
+        uploader_name = request.args.get('metadata[uploader-name]')
+        file_type = request.args.get('type')
     except ValueError as e:
         print(e)
         return Response({"error": "Now just hold on a minute, bucko."}, status=400, mimetype="application/json")
 
     params = request.args
     # Due to issues with how S3 encodes plus signs I'm just going to replace them with spaces for now.
-    filename_with_folder = f'{user_facing_id}/{get_next_asset_id(user_facing_id)[0]}_{params["filename"].replace("+", " ")}'
+    filename_with_folder = f'{user_facing_id}/{get_next_asset_id(user_facing_id)[0]}_{uploader_name.replace(" ", "-")}_{params["filename"].replace("+", " ")}'
+    
+    fields = {
+        'x-amz-meta-uploader-name': uploader_name
+    }
 
-    x = generate_presigned_post(filename_with_folder, params['type'])
-    x['fields']['key'] = filename_with_folder
+    x = generate_presigned_post(filename_with_folder, params['type'], fields, uploader_name)
+    # x['fields']['content_type'] = file_type
     return json.dumps(x)

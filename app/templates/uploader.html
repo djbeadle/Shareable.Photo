@@ -7,6 +7,18 @@
 {% block content %}
 <blockquote>{{ event_description }}</blockquote>
 
+    <label>
+        Uploader Name
+        <input
+            type="text"
+            id="uploader_name"
+            placeholder="Uploader's Name"
+            default='anonymous'
+            oninput="uppy.setMeta({ 'uploader_name': document.getElementById('uploader_name').value });"
+            required
+        >
+    </label>
+
 <div id="drag-drop-area"></div>
 
 <a href="/get_event/{{user_facing_id}}">Gallery</a>
@@ -15,12 +27,35 @@
 <script src="https://releases.transloadit.com/uppy/v2.3.2/uppy.min.js"></script>
 <script>
     const { AwsS3 } = window.Uppy;
+    
+    // The user doesn't want to identify themselves
+    let first_upload = true;
+
+    function update_uploader_name_on_first_upload(){
+        let name = uppy.getState().meta['uploader_name'];
+        
+        if (name === 'anonymous' && first_upload){
+            name = prompt("Associate your name with these files? (Cancel to upload as anonymous)");
+            if (name !== null){
+                uppy.setMeta({ 'uploader_name': name });
+                document.getElementById('uploader_name').value = name;
+            }
+            else {
+                first_upload = false;
+            }
+        }
+    }
 
     var uppy = new Uppy.Core(
         {
             restrictions: {
                 allowedFileTypes: ['.jpg', '.JPG', '.jpeg', '.JPEG', '.heic', '.heif', '.png', '.PNG', '.mov', '.MOV', '.mp4', '.MP4', '.gif', '.GIF', '.mkv'],
             },
+            onBeforeUpload: () => { update_uploader_name_on_first_upload() },
+            meta: {
+                'uploader-name': document.getElementById('uploader_name').value || "unknown"
+            },
+            debug: false
         })
         .use(Uppy.Dashboard, {
             inline: true,
@@ -29,6 +64,7 @@
         })
         .use(AwsS3, {
             limit: 2,
+            metaFields: ['uploader-name'],
             timeout: 60000, // 1 minute
             companionUrl: '/{{user_facing_id}}/'
         })
