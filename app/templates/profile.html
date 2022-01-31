@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.css" integrity="sha512-+VDbDxc9zesADd49pfvz7CgsOl2xREI/7gnzcdyA9XjuTxLXrdpuz21VVIqc5HPfZji2CypSbxx1lgD7BgBK5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha512-ooSWpxJsiXe6t4+PPjCgYmVfr1NS5QXJACcR/FPpsdm6kqG1FmQ2SVyg2RXeVuCRBLr0lWHnWJP6Zs1Efvxzww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    /*
+    Ensure the size of the image fit the container perfectly
+    https://github.com/fengyuanchen/cropperjs/blob/main/README.md#example
+    */
+    img {
+    display: block;
+
+    /* This rule is very important, please don't ignore this */
+    max-width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Profile</h1>
+
+<form action="" method="post">
+    <label>
+        Display name
+        <input
+            type="text"
+            name="display-name"
+        >
+    </label>
+    <input type="submit" value="Save">
+
+    <br>
+    <br>
+    
+</form>
+
+<!-- Wrap the image or canvas element with a block element (container) -->
+<div id="new-profile" style="display: none;">
+    <img id="uncropped_avatar" src="picture.jpg">
+</div>
+
+<div id="old-profile" style="display: block;">
+    Current profile picture:<br>
+    <img class="rounded" id="avatar" src="https://avatars0.githubusercontent.com/u/3456749?s=160" alt="avatar">
+</div>
+
+<div class="container">
+    <label id="avatar-changer-container">
+        <br>
+        Upload new profile picture:
+        <br>
+        <input type="file" class="sr-only" id="avatar-changer" name="image" accept="image/*">
+    </label>
+
+    <div class="alert" role="alert"></div>
+
+    <div id="modal" style="display: none;" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">Crop the image</h5>
+            </div>
+            <div class="modal-body">
+            <div class="img-container">
+                <img id="image" src="https://avatars0.githubusercontent.com/u/3456749">
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" onclick="window.location.href='/profile'">Cancel</button>
+            <button type="button" class="btn btn-primary" id="crop">Crop and Save</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</form>
+
+<script src="https://unpkg.com/jquery@3/dist/jquery.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/bootstrap@4/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script>
+
+  const display_cropper_event = new Event('display_cropper');
+  const hide_cropper_event = new Event('hide_cropper');
+  var filename;
+
+  window.addEventListener('DOMContentLoaded', function () {
+    var avatar = document.getElementById('avatar');
+    var image = document.getElementById('image');
+    var input = document.getElementById('avatar-changer');
+    var $alert = $('.alert');
+    var $modal = $('#modal');
+    var cropper;
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    input.addEventListener('change', function (e) {
+      var files = e.target.files;
+      filename = e.target.files[0].name;
+      var done = function (url) {
+        input.value = '';
+        image.src = url;
+        $alert.hide();
+        // $modal.modal('show');
+        document.getElementById("modal").style = "visibility: visible;";
+        document.getElementById("avatar-changer-container").style = "display: none;";
+        document.getElementById("modal").dispatchEvent(display_cropper_event);
+      };
+      var reader;
+      var file;
+      var url;
+
+      if (files && files.length > 0) {
+        file = files[0];
+
+        if (URL) {
+          done(URL.createObjectURL(file));
+        } else if (FileReader) {
+          reader = new FileReader();
+          reader.onload = function (e) {
+            done(reader.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    });
+
+    $modal.on('display_cropper', function () {
+      cropper = new Cropper(image, {
+        aspectRatio: 1,
+        viewMode: 3,
+      });
+    }).on('hide_cropper', function () {
+      cropper.destroy();
+      cropper = null;
+    });
+
+    document.getElementById('crop').addEventListener('click', async function () {
+      var initialAvatarURL;
+      var canvas;
+
+      document.getElementById("avatar-changer-container").style = "visibility: hidden;";
+      // $modal.modal('hide');
+
+      if (cropper) {
+        canvas = cropper.getCroppedCanvas({
+          width: 160,
+          height: 160,
+        });
+        initialAvatarURL = avatar.src;
+        document.getElementById('uncropped_avatar').src = canvas.toDataURL();
+        $alert.removeClass('alert-success alert-warning');
+        canvas.toBlob(async function (blob) {
+          var formData = new FormData();
+
+          formData.append('avatar', blob, 'avatar.jpg');
+
+          const response = await fetch(`/s3/upload_profile_pic?filename=${filename}`, { method: "GET", });
+          const presigned_post = await response.json();
+
+          $.ajax('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+
+            xhr: function () {
+              var xhr = new XMLHttpRequest();
+
+              return xhr;
+            },
+
+            success: function () {
+              $alert.show().addClass('alert-success').text('Upload success');
+            },
+
+            error: function () {
+              avatar.src = initialAvatarURL;
+              $alert.show().addClass('alert-warning').text('Upload error');
+            },
+
+            complete: function () {
+              window.location.href = "/profile";
+            },
+          });
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

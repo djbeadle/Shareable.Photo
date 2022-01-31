@@ -1,3 +1,4 @@
+import http.client
 from urllib.parse import urlencode
 from flask import url_for, current_app, session, redirect, request, Response,render_template
 from app.auth import auth_bp
@@ -6,7 +7,7 @@ from db_operations import get_user, insert_user, record_upload, get_next_asset_i
 
 from s3 import generate_presigned_post
 
-import json, urllib
+import json, urllib, hashlib
 from uuid import UUID
 
 @auth_bp.route('/dashboard')
@@ -26,6 +27,7 @@ def login():
 
 # Here we're using the /callback route.
 @auth_bp.route('/authy_callback')
+@requires_auth
 def callback_handling():
     # Handles response from token endpoint
     current_app.auth0.authorize_access_token()
@@ -43,10 +45,59 @@ def callback_handling():
     if not get_user(userinfo['sub']):
         insert_user(userinfo['sub'], userinfo['email'])
 
-    return redirect('/events')
+    return redirect('/profile')
+
+
+@auth_bp.route('/profile', methods=['GET'])
+@requires_auth
+def profile():
+    return render_template(
+        'profile.html',
+        user_info=session['profile'],
+    )
+
+@auth_bp.route('/profile', methods=['POST'])
+@requires_auth
+def set_profile():
+    conn = http.client.HTTPSConnection("ceaseless-watcher.us.auth0.com")
+
+    payload = json.dumps({
+        "client_id": current_app.config["AUTH0_MANAGEMENT_ID"],
+        "client_secret": current_app.config["AUTH0_MANAGEMENT_SECRET"],
+        "audience": "https://ceaseless-watcher.us.auth0.com/api/v2/",
+        "grant_type":"client_credentials"
+    })
+    headers = { 'content-type': "application/json" }
+
+    conn.request("POST", "/oauth/token", payload, headers)
+
+    res = conn.getresponse()
+    data = res.read()
+    auth0_resp = json.loads(data.decode("utf-8"))
+    print(json.dumps(auth0_resp))
+
+    print("*********")
+    headers = {
+            'Authorization': f'{auth0_resp["token_type"]} {auth0_resp["access_token"]}',
+            'content-type': "application/json"
+        }
+    print(json.dumps(headers))
+    print("*********")
+    conn.request(
+        "GET",
+        f'/api/v2/users/{session["jwt_payload"]["sub"]}',
+        headers=headers
+    )
+    
+    data_2 = conn.getresponse().read()
+    auth0_user_resp = json.loads(data_2.decode("utf-8"))
+
+    # TODO singleton the token
+    return json.dumps(auth0_user_resp)
 
 
 @auth_bp.route('/logout')
+@requires_auth
 def logout():
     # Clear session stored data
     session.clear()
@@ -129,6 +180,33 @@ def sns():
         )
 
     return 'OK\n'
+
+
+@auth_bp.route('/s3/upload_profile_pic')
+@requires_auth
+def upload_profile_pic():
+    # https://github.com/transloadit/uppy/blob/main/packages/%40uppy/companion/src/server/controllers/s3.js
+    try:
+        print(f'metadata: {json.dumps(request.args)}')
+        filename = request.args.get('type')
+    except ValueError as e:
+        print(e)
+        return Response({"error": "Now just hold on a minute, bucko."}, status=400, mimetype="application/json")
+
+    params = request.args
+    # Using md5 here doesn't sit right with me but I'm not sure of a better solution. At least this way I'm not revealing
+    # the user's Oauth sub publically and it should be hard enough to guess.
+    filename_with_folder = f'profile_pic/{hashlib.md5(session["jwt_payload"]["sub"].encode("utf-8")).hexdigest()}{params["filename"].split(".")[1]}'
+
+    x = generate_presigned_post(filename_with_folder, "", {})
+    # x['fields']['content_type'] = file_type
+    return json.dumps(x)
+
+
+@auth_bp.route('/<user_facing_id>/s3/upload_thumbnail')
+def get_presigned_s3_thumbnail_url(user_facing_id):
+    print(json.dumps(request.args, indent=2))
+    return json.dumps(generate_presigned_post(f'{user_facing_id}/{request.args["filename"]}', "", {}))
 
 
 @auth_bp.route('/<user_facing_id>/s3/params')

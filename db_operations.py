@@ -72,7 +72,7 @@ def create_event(title: str, description: str, creator_user_id: str, status=0):
     try:
         user_facing_id = uuid.uuid4()
         cur.execute(
-            "INSERT INTO events(user_facing_id, title, description, status, owner_user_id) values (?, ?, ?, ?, ?);",
+            "INSERT INTO events(user_facing_id, title, description, status, owner_user_id) VALUES (?, ?, ?, ?, ?);",
             [str(user_facing_id), title, description, status, creator_user_id]
         )
 
@@ -138,6 +138,13 @@ def get_images(event_id: str):
     cur = db.cursor()
 
     cur.execute("SELECT filename FROM assets WHERE event_id = ?", [event_id])
+    return cur.fetchall()
+
+def get_image_thumbnails(event_id: str):
+    db = get_db()
+    cur = db.cursor()
+
+    cur.execute("SELECT filename FROM assets WHERE event_id = ? AND filename LIKE 'thumb%';", [event_id])
     return cur.fetchall()
 
 def get_next_asset_id(event_id: str):

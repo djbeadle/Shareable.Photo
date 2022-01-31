@@ -1,5 +1,5 @@
 from flask import render_template, request, Response, session, redirect, url_for, current_app
-from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images
+from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails
 from app.landing import landing_bp
 from app.toolbox import requires_auth
 
@@ -69,6 +69,22 @@ def get_event(user_facing_id: str):
     
     return render_template(
         'info.html',
+        asset_count=event_asset_count(user_facing_id),
+        images=event_images,
+        content=get_event_info(user_facing_id)
+    )
+
+@landing_bp.route('/gallery/<user_facing_id>', methods=['GET'])
+def get_event_gallery(user_facing_id: str):
+    x = get_event_info(user_facing_id)
+    
+    if x is None:
+        return Response(f'Either this event does not exist or you are not authorized to view its gallery. Try logging in at {url_for("auth_bp.login", _external=True)}', status=404)
+
+    event_images = [create_presigned_url(f'{user_facing_id}/{x[0]}') for x in list(get_image_thumbnails(user_facing_id))]
+    
+    return render_template(
+        'gallery.html',
         asset_count=event_asset_count(user_facing_id),
         images=event_images,
         content=get_event_info(user_facing_id)

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ content[1] }} Gallery</h2>
+<a href="/uploader/{{ content[0] }}">Upload!</a>
+<br>
+<br>
+
+{% if asset_count == 0 %}
+    <p>Nothing has been uploaded yet!</p>
+{% else %}
+    Number of files: {{asset_count}}
+    {% for image in images %}
+        <img style="max-width: 100%; max-height: 200px" src="{{image}}">
+    {% endfor %}
+{% endif %}
+
+{% endblock %}
