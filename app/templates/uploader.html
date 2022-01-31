@@ -7,13 +7,13 @@
 {% block content %}
 <blockquote>{{ event_description }}</blockquote>
 
+<a href="/gallery/{{ user_facing_id }}">Gallery!</a>
+
 <label>
     Uploader Name
     <input type="text" id="uploader-name" placeholder="Uploader's Name" default='anonymous'
         oninput="uppy.setMeta({ 'uploader-name': document.getElementById('uploader-name').value });" required>
 </label>
-
-<a href="/gallery/{{ content[0] }}">Gallery!</a>
 
 <div id="drag-drop-area"></div>
 
