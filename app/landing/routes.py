@@ -81,7 +81,8 @@ def get_event_gallery(user_facing_id: str):
     if x is None:
         return Response(f'Either this event does not exist or you are not authorized to view its gallery. Try logging in at {url_for("auth_bp.login", _external=True)}', status=404)
 
-    event_images = [create_presigned_url(f'{user_facing_id}/{x[0]}') for x in list(get_image_thumbnails(user_facing_id))]
+    # [("presigned thumbnail url", "url to get presigned full resolution url")]
+    event_images = [(create_presigned_url(f'{user_facing_id}/{x[0]}'), f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}') for x in list(get_image_thumbnails(user_facing_id))]
     
     return render_template(
         'gallery.html',
@@ -89,3 +90,16 @@ def get_event_gallery(user_facing_id: str):
         images=event_images,
         content=get_event_info(user_facing_id)
     )
+
+@landing_bp.route('/full_res/<user_facing_id>/<image_id>', methods=['GET'])
+def get_full_res_image(user_facing_id: str, image_id: str):
+    """
+    Do I really need this? Maybe I should just make the images public in AWS.
+
+    Pros of this function:
+        - Able to revoke access to images
+
+    Cons of this function:
+        - Every full-res image load hits it
+    """
+    return redirect(create_presigned_url(f'{user_facing_id}/{image_id}'))

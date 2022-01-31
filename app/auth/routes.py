@@ -11,7 +11,6 @@ import json, urllib, hashlib
 from uuid import UUID
 
 @auth_bp.route('/dashboard')
-@requires_auth
 def dashboard():
     return render_template(
         'dashboard.html',
@@ -27,7 +26,6 @@ def login():
 
 # Here we're using the /callback route.
 @auth_bp.route('/authy_callback')
-@requires_auth
 def callback_handling():
     # Handles response from token endpoint
     current_app.auth0.authorize_access_token()
@@ -45,7 +43,7 @@ def callback_handling():
     if not get_user(userinfo['sub']):
         insert_user(userinfo['sub'], userinfo['email'])
 
-    return redirect('/profile')
+    return redirect('/dashboard')
 
 
 @auth_bp.route('/profile', methods=['GET'])
