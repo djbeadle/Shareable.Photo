@@ -77,28 +77,33 @@
         })
 
     uppy.on('upload-success', async (f, s3_resp)=> {
+        // No preview if Uppy couldn't generate a preview (not a supported file type)
+        if (f.preview === undefined){
+            return;
+        }        
+        
         // Get the formatted file name we generated on the backend so we can name the thumbnail appropriately
         const [_, filename] = f.meta.key.split('/');
-            // Get a pre-signed post URL from the backend
-            const resp = await fetch(`/{{user_facing_id}}/s3/upload_thumbnail?filename=thumb_${filename}`);
-            const data = await resp.json();
+        // Get a pre-signed post URL from the backend
+        const resp = await fetch(`/{{user_facing_id}}/s3/upload_thumbnail?filename=thumb_${filename}`);
+        const data = await resp.json();
 
-            const thumbnail_data = new FormData();
-            for (const [field_name, field_value] of Object.entries(data.fields)) {
-                thumbnail_data.append(field_name, field_value)
-            }
+        const thumbnail_data = new FormData();
+        for (const [field_name, field_value] of Object.entries(data.fields)) {
+            thumbnail_data.append(field_name, field_value)
+        }
 
-            // Get the data out of the blob!
-            const file_temp = await fetch(f.preview).then(r => r.blob()).then(blobFile => new File([blobFile], data.fields.key, { type: "image/jpg" }));
-            thumbnail_data.append("file", file_temp);   
+        // Get the data out of the blob!
+        const file_temp = await fetch(f.preview).then(r => r.blob()).then(blobFile => new File([blobFile], data.fields.key, { type: "image/jpg" }));
+        thumbnail_data.append("file", file_temp);   
 
-            fetch(
-                // bucket URL
-                data.url,
-                {
-                    body: thumbnail_data,
-                    method: "post"
-                });
+        fetch(
+            // bucket URL
+            data.url,
+            {
+                body: thumbnail_data,
+                method: "post"
+            });
     })
 </script>
 {% endblock %}
