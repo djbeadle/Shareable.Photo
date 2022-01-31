@@ -9,7 +9,7 @@
 {% if asset_count == 0 %}
     <p>Nothing has been uploaded yet!</p>
 {% else %}
-    Number of files: {{asset_count}}
+    Number of files: {{asset_count}} <br>
     {% for image in images %}
         <img style="max-width: 100%; max-height: 200px" src="{{image}}">
     {% endfor %}
