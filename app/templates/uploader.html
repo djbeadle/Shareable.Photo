@@ -48,6 +48,7 @@
         if (name === 'anonymous' && first_upload) {
             name = prompt("Would you like to associate your name with these files?", "anonymous");
             if (name !== null) {
+                document.cookie=`name=${name}`;
                 uppy.setMeta({ 'uploader-name': name });
                 document.getElementById('uploader-name').value = name;
                 first_upload = false;
