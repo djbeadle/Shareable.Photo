@@ -68,13 +68,14 @@ def create_app(config_name):
     cur = db.cursor()
     
     oauth.init_app(app)
+    auth0_base = config[config_name].AUTH0_URL_BASE
     app.auth0 = oauth.register(
         'auth0',
-        client_id='TRuQsy4uFa27xxcuEDZDnxvFEWlwctPb',
-        client_secret=config[config_name].AUTHY_CLIENT_SECRET,
-        api_base_url='https://ceaseless-watcher.us.auth0.com',
-        access_token_url='https://ceaseless-watcher.us.auth0.com/oauth/token',
-        authorize_url='https://ceaseless-watcher.us.auth0.com/authorize',
+        client_id=config[config_name].AUTH0_CLIENT_ID,
+        client_secret=config[config_name].AUTH0_CLIENT_SECRET,
+        api_base_url=f'https://{auth0_base}',
+        access_token_url=f'https://{auth0_base}/oauth/token',
+        authorize_url=f'https://{auth0_base}/authorize',
         client_kwargs={
             'scope': 'openid profile email',
         },
