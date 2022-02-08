@@ -8,6 +8,16 @@ def get_db():
         db = g._database = sqlite3.connect(current_app.config['DB_NAME'])
     return db
 
+def increment_view_counter(event_id, filename):
+    db = get_db()
+    cur = db.cursor()
+    try:
+        cur.execute("UPDATE assets SET views = views + 1 WHERE filename=? AND event_id=?;", [filename, event_id])
+        db.commit()
+    except Exception as e:
+        print(f'ERROR: Cannot update view counter, no file with filename "{filename}" and event_id "{event_id}" exists.')
+        print(e)
+
 
 def list_all_events():
     db = sqlite3.connect(current_app.config['DB_NAME'])

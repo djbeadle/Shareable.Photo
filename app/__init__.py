@@ -4,6 +4,7 @@ from authlib.integrations.flask_client import OAuth
 
 # Good app factory example: https://hackersandslackers.com/flask-login-user-authentication
 
+
 try:
   from config import config, DevelopmentConfig, ProductionConfig
 except ModuleNotFoundError as e:
@@ -106,6 +107,7 @@ def create_app(config_name):
                 event_id TEXT NOT NULL,
                 size INT NOT NULL,
                 etag TEXT NOT NULL,
+                views INT DEFAULT 0,
                 FOREIGN KEY(event_id) REFERENCES events(id)
             );
         """)

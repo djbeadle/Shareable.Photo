@@ -1,0 +1,19 @@
+ * Serving Flask app "myapp.py" (lazy loading)
+ * Environment: development
+ * Debug mode: on
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 310-286-850
+Firing things up
+This is the config name: development
+This is initalization for the development config.
+Database creation error!
+near "views": syntax error
+development
+Firing things up
+This is the config name: development
+This is initalization for the development config.
+Database creation error!
+near "views": syntax error
+development

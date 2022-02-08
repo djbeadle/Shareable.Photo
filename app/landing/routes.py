@@ -1,5 +1,5 @@
 from flask import render_template, request, Response, session, redirect, url_for, current_app
-from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails
+from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails, increment_view_counter
 from app.landing import landing_bp
 from app.toolbox import requires_auth
 
@@ -83,10 +83,13 @@ def get_event_gallery(user_facing_id: str):
 
     # [("presigned thumbnail url", "url to get presigned full resolution url")]
     event_images = [(create_presigned_url(f'{user_facing_id}/{x[0]}'), f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}') for x in list(get_image_thumbnails(user_facing_id))]
-    
+   
+    event_info = get_event_info(user_facing_id)
+
     return render_template(
         'gallery.html',
         asset_count=event_asset_count(user_facing_id),
+        custom_title=event_info[1],
         images=event_images,
         content=get_event_info(user_facing_id)
     )
@@ -102,4 +105,5 @@ def get_full_res_image(user_facing_id: str, image_id: str):
     Cons of this function:
         - Every full-res image load hits it
     """
+    increment_view_counter(user_facing_id, image_id)
     return redirect(create_presigned_url(f'{user_facing_id}/{image_id}'))

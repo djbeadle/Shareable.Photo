@@ -67,7 +67,7 @@
             inline: true,
             target: '#drag-drop-area',
             proudlyDisplayPoweredByUppy: false,
-            waitForThumbnailsBeforeUpload: false,
+            waitForThumbnailsBeforeUpload: true,
             thumbnailWidth: 400,
         })
         .use(AwsS3, {
@@ -80,8 +80,10 @@
     uppy.on('upload-success', async (f, s3_resp)=> {
         // No preview if Uppy couldn't generate a preview (not a supported file type)
         if (f.preview === undefined){
+            console.info(`No thumbnail for ${f.meta.key}`);
             return;
-        }        
+        }
+        console.info(`Uploading thumbnail for ${f.meta.key}`);
         
         // Get the formatted file name we generated on the backend so we can name the thumbnail appropriately
         const [_, filename] = f.meta.key.split('/');
