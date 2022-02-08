@@ -41,10 +41,33 @@
     margin-bottom: -38px;
 }
 
+.three-squares {
+    width: 32%;
+    
+}
+
+.three-squares img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
 
 .three-per-row{
     width: 32%;
     text-align:center;
+}
+
+.two-squares {
+    width: 47%;
+    
+}
+
+.two-squares img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
 }
 
 .two-per-row{
@@ -62,7 +85,7 @@
 <script>
     // Zoom
     let current_idx = 0;
-    const classes = ["three-per-row", "two-per-row", "full-width"];
+    const classes = ["three-squares", "three-per-row", "two-squares",  "two-per-row", "full-width"];
     
     function change_zoom(delta){
         if (current_idx + delta > classes.length - 1 || current_idx + delta < 0){
@@ -109,7 +132,7 @@
 {% else %}
     <div id="gallery-container">
     {% for image in images %}
-        <div class="three-per-row" href="/full_res/{{image[1]}}">
+        <div class="three-squares" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
             <a href="/full_res/{{image[1]}}">&#10515;</a>
         </div>
