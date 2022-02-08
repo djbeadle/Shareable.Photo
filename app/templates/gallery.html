@@ -57,7 +57,6 @@
     const classes = ["three-per-row", "two-per-row", "full-width"];
     
     function change_zoom(delta){
-        console.log(`delta: ${delta}`);
         if (current_idx + delta > classes.length - 1 || current_idx + delta < 0){
             return;
         }
@@ -83,27 +82,23 @@
         else if (current_idx === 0){
             zo.disabled = true;
         }
-
-        console.log(`current_idx: ${current_idx}`);
     }
 </script>
 {% endblock %}
 
 {% block content %}
 <div id="title">
-    <h2>{{ content[1] }} Gallery</h2>
+    <a class="nav-button" style="margin-right:100%; margin-left:0; margin-right:0;" href="/uploader/{{ content[0] }}">Upload!</a>
 
     <div>Zoom:
         <button id="zoom_out" onClick="change_zoom(-1);" disabled>-</button>
         <button id="zoom_in" onClick="change_zoom(1);">+</button>
     </div>
 </div>
-<a href="/uploader/{{ content[0] }}">Upload!</a>
 
 {% if asset_count == 0 %}
     <p>Nothing has been uploaded yet!</p>
 {% else %}
-    Number of files: {{asset_count}} <br>
     <div id="gallery-container">
     {% for image in images %}
         <div class="three-per-row" href="/full_res/{{image[1]}}">
