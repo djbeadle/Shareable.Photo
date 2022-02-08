@@ -57,7 +57,8 @@ def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire
             'get_object',
             Params={
                 'Bucket': bucket_name,
-                'Key': object_name.replace("+", " ")
+                'Key': object_name.replace("+", " "),
+                'ResponseContentDisposition': f'attachment; filename={object_name.split("/")[1]}'
             },
             ExpiresIn=expiration
         )
