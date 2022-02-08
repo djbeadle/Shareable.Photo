@@ -1,20 +1,98 @@
 {% extends 'base.html' %}
 
+{% block extra_styles %}
+#title {
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+#gallery-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.three-per-row{
+    width: 32%;
+    text-align:center;
+}
+
+.two-per-row{
+    width: 48%;
+    text-align:center;
+}
+.full-width{
+    width: 100%;
+    text-align:center;
+}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let current_idx = 0;
+    const classes = ["three-per-row", "two-per-row", "full-width"];
+    
+    function change_zoom(delta){
+        console.log(`delta: ${delta}`);
+        if (current_idx + delta > classes.length - 1 || current_idx + delta < 0){
+            return;
+        }
+        current_idx += delta;
+
+        for (const thumb of document.getElementById("gallery-container").children){
+            thumb.className = classes[current_idx];
+        }
+
+        // Disable the zoom in and out buttons on max zooms
+        const zi = document.getElementById("zoom_in");
+        const zo = document.getElementById("zoom_out");
+
+        if (delta === -1){
+            zi.disabled = false;
+        }
+        else {
+            zo.disabled = false;
+        }
+        if (current_idx === classes.length - 1){
+            zi.disabled = true;
+        }
+        else if (current_idx === 0){
+            zo.disabled = true;
+        }
+
+        console.log(`current_idx: ${current_idx}`);
+    }
+</script>
+{% endblock %}
+
 {% block content %}
-<h2>{{ content[1] }} Gallery</h2>
+<div id="title">
+    <h2>{{ content[1] }} Gallery</h2>
+
+    <div>Zoom:
+        <button id="zoom_out" onClick="change_zoom(-1);" disabled>-</button>
+        <button id="zoom_in" onClick="change_zoom(1);">+</button>
+    </div>
+</div>
 <a href="/uploader/{{ content[0] }}">Upload!</a>
-<br>
-<br>
 
 {% if asset_count == 0 %}
     <p>Nothing has been uploaded yet!</p>
 {% else %}
     Number of files: {{asset_count}} <br>
+    <div id="gallery-container">
     {% for image in images %}
-        <a href="/full_res/{{image[1]}}">
-            <img style="max-width: 100%; max-height: 200px" src="{{image[0]}}">
+        <a class="three-per-row" href="/full_res/{{image[1]}}">
+            <img style="width:100%;" src="{{image[0]}}">
         </a>
     {% endfor %}
+    </div>
 {% endif %}
 
 {% endblock %}
