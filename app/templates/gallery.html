@@ -17,6 +17,24 @@
     justify-content: space-between;
 }
 
+#gallery-container div a{
+    background: var(--background-body);
+    position: relative;
+    bottom: 40px;
+    float:right;
+    color: var(--links);
+    border-radius: 50% 0 0 0;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 1.5;
+    padding: 4px;
+
+    /* "Position relative" moves the element but the space originally occupied remains empty, this negative margin cancels it out! */
+    margin-bottom: -38px;
+}
+
+
 .three-per-row{
     width: 32%;
     text-align:center;
@@ -88,9 +106,10 @@
     Number of files: {{asset_count}} <br>
     <div id="gallery-container">
     {% for image in images %}
-        <a class="three-per-row" href="/full_res/{{image[1]}}">
+        <div class="three-per-row" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
-        </a>
+            <a href="/full_res/{{image[1]}}">&#10515;</a>
+        </div>
     {% endfor %}
     </div>
 {% endif %}
