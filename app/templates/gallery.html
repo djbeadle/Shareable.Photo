@@ -85,7 +85,11 @@
 <script>
     // Zoom
     let current_idx = 0;
-    const classes = ["three-squares", "three-per-row", "two-squares",  "two-per-row", "full-width"];
+    // Our buttons
+    const zi = document.getElementById("zoom_in");
+    const zo = document.getElementById("zoom_out");
+    // in ascending order from zoomed-out to zoomed-in
+    const classes = ["three-per-row", "three-squares", "two-per-row", "two-squares", "full-width"];
     
     function change_zoom(delta){
         if (current_idx + delta > classes.length - 1 || current_idx + delta < 0){
@@ -97,22 +101,34 @@
             thumb.className = classes[current_idx];
         }
 
-        // Disable the zoom in and out buttons on max zooms
-        const zi = document.getElementById("zoom_in");
-        const zo = document.getElementById("zoom_out");
-
+        // If we zoomed out we can now zoom in
         if (delta === -1){
             zi.disabled = false;
         }
         else {
             zo.disabled = false;
         }
+
+        // If we're at the most zoomed in point we can't zoom in any more
         if (current_idx === classes.length - 1){
             zi.disabled = true;
         }
         else if (current_idx === 0){
             zo.disabled = true;
         }
+
+        // Store the current setting in a cookie
+        document.cookie=`zoom-level=${classes[current_idx]}`;
+    }
+
+    // Retrieve the previous zoom level from the cookie (via the backend)
+    current_idx = classes.findIndex(a => a === "{{zoom_level}}");
+    // If we're at the most zoomed in point we can't zoom in any more
+    if (current_idx === classes.length - 1){
+        zi.disabled = true;
+    }
+    else if (current_idx === 0){
+        zo.disabled = true;
     }
 </script>
 {% endblock %}
@@ -122,7 +138,7 @@
     <a class="nav-button" style="margin-right:100%; margin-left:0; margin-right:0;" href="/uploader/{{ content[0] }}">Upload!</a>
 
     <div>Zoom:
-        <button id="zoom_out" onClick="change_zoom(-1);" disabled>-</button>
+        <button id="zoom_out" onClick="change_zoom(-1);">-</button>
         <button id="zoom_in" onClick="change_zoom(1);">+</button>
     </div>
 </div>
@@ -132,7 +148,7 @@
 {% else %}
     <div id="gallery-container">
     {% for image in images %}
-        <div class="three-squares" href="/full_res/{{image[1]}}">
+        <div class="{{zoom_level}}" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
             <a href="/full_res/{{image[1]}}">&#10515;</a>
         </div>

@@ -90,6 +90,7 @@ def get_event_gallery(user_facing_id: str):
         'gallery.html',
         asset_count=event_asset_count(user_facing_id),
         custom_title=event_info[1],
+        zoom_level=request.cookies.get("zoom-level", "three-squares"),
         images=event_images,
         content=get_event_info(user_facing_id)
     )
