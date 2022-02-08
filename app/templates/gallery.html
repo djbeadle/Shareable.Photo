@@ -7,6 +7,13 @@
     flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
+ 
+    background-color: var(--background-body);
+ 
+    position: sticky;
+    top: 0px;
+    padding-top: 10px;
+    z-index: 10;
 }
 
 #gallery-container {
@@ -53,6 +60,7 @@
 
 {% block scripts %}
 <script>
+    // Zoom
     let current_idx = 0;
     const classes = ["three-per-row", "two-per-row", "full-width"];
     
