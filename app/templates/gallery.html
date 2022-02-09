@@ -97,7 +97,7 @@
 
     async function share(name){
         // If webshare API is not supported simply redirect to download
-        if (true || !navigator.share){
+        if (!navigator.share){
            window.location.href = `/full_res/${name}`;
            return;
         }
