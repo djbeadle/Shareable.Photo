@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+{# https://js-loading-overlay.muhdfaiz.com/ #}
+<script src="https://cdn.jsdelivr.net/npm/js-loading-overlay@1.2.0/dist/js-loading-overlay.min.js" integrity="sha256-g9BS2M5/bvSHiIEZeQhkCpJP0iBorA5mnDznsk+89OU=" crossorigin="anonymous"></script>
+{% endblock %}
+
 {% block extra_styles %}
 #title {
     display:flex;
@@ -78,7 +83,6 @@
     width: 100%;
     text-align:center;
 }
-
 {% endblock %}
 
 {% block scripts %}
@@ -93,18 +97,21 @@
 
     async function share(name){
         // If webshare API is not supported simply redirect to download
-        if (!navigator.share){
+        if (true || !navigator.share){
            window.location.href = `/full_res/${name}`;
+           return;
         }
 
         // If we can webshare fetch the image
+        JsLoadingOverlay.show();
         fetch(`/full_res/${name}`)
             .then(res=>res.blob())
             .then(blob=>{
                 // Remove the folder name
                 const temp_img = new File([blob], name.split('/', 2)[1]);
                 navigator.share({files: [temp_img]})
-            });
+            })
+            .then(_ => JsLoadingOverlay.hide());
         // await navigator.share({file: await fetch(`/full_res/${name}`).body});
     };
     
@@ -165,7 +172,7 @@
 {% else %}
     <div id="gallery-container">
     {% for image in images %}
-        <div class="{{zoom_level}}" href="/full_res/{{image[1]}}">
+        <div id="{{image[1]}}" class="{{zoom_level}}" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
             <!-- <a href="/full_res/{{image[1]}}">&#10515;</a> -->
             <a onclick="share('{{image[1]}}');">&#10515</a>
