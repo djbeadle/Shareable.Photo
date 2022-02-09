@@ -150,7 +150,8 @@
     {% for image in images %}
         <div class="{{zoom_level}}" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
-            <a href="/full_res/{{image[1]}}">&#10515;</a>
+            <!-- <a href="/full_res/{{image[1]}}">&#10515;</a> -->
+            <a href="#" onclick="navigator.share({url: '/full_res/{{image[1]}}'})">share</a>
         </div>
     {% endfor %}
     </div>

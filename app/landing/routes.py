@@ -1,4 +1,4 @@
-from flask import render_template, request, Response, session, redirect, url_for, current_app
+from flask import render_template, request, Response, session, redirect, url_for, current_app, make_response
 from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails, increment_view_counter
 from app.landing import landing_bp
 from app.toolbox import requires_auth
@@ -86,14 +86,16 @@ def get_event_gallery(user_facing_id: str):
    
     event_info = get_event_info(user_facing_id)
 
-    return render_template(
+    r = make_response(render_template(
         'gallery.html',
         asset_count=event_asset_count(user_facing_id),
         custom_title=event_info[1],
         zoom_level=request.cookies.get("zoom-level", "three-squares"),
         images=event_images,
         content=get_event_info(user_facing_id)
-    )
+    ))
+    r.headers.set('Feature-Policy', "web-share src")
+    return r
 
 @landing_bp.route('/full_res/<user_facing_id>/<image_id>', methods=['GET'])
 def get_full_res_image(user_facing_id: str, image_id: str):
