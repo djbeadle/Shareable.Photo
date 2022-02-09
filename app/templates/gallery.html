@@ -90,6 +90,23 @@
     const zo = document.getElementById("zoom_out");
     // in ascending order from zoomed-out to zoomed-in
     const classes = ["three-per-row", "three-squares", "two-per-row", "two-squares", "full-width"];
+
+    async function share(name){
+        // If webshare API is not supported simply redirect to download
+        if (!navigator.share){
+           window.location.href = `/full_res/${name}`;
+        }
+
+        // If we can webshare fetch the image
+        fetch(`/full_res/${name}`)
+            .then(res=>res.blob())
+            .then(blob=>{
+                // Remove the folder name
+                const temp_img = new File([blob], name.split('/', 2)[1]);
+                navigator.share({files: [temp_img]})
+            });
+        // await navigator.share({file: await fetch(`/full_res/${name}`).body});
+    };
     
     function change_zoom(delta){
         if (current_idx + delta > classes.length - 1 || current_idx + delta < 0){
@@ -151,7 +168,7 @@
         <div class="{{zoom_level}}" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
             <!-- <a href="/full_res/{{image[1]}}">&#10515;</a> -->
-            <a href="#" onclick="navigator.share({url: '/full_res/{{image[1]}}'})">share</a>
+            <a onclick="share('{{image[1]}}');">&#10515</a>
         </div>
     {% endfor %}
     </div>
