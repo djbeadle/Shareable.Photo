@@ -12,7 +12,7 @@
 <label>
     Uploader Name
     <input type="text" id="uploader-name" placeholder="Uploader's Name" default='anonymous'
-        oninput="uppy.setMeta({ 'uploader-name': document.getElementById('uploader-name').value });" required>
+        oninput="removeInvalidChars(); uppy.setMeta({ 'uploader-name': document.getElementById('uploader-name').value });" required>
 </label>
 
 <div id="drag-drop-area"></div>
@@ -50,6 +50,20 @@
                 return false;
             }
         }
+    }
+
+    // Prevent EMoji in the name!
+    var ranges = [
+        '\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
+        '\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F
+        '\ud83d[\ude80-\udeff]'  // U+1F680 to U+1F6FF
+    ];
+    
+    function removeInvalidChars() {
+        var str = document.getElementById('uploader-name').value;
+
+        str = str.replace(/[^a-z0-9]/gi,'');
+        document.getElementById("uploader-name").value = str;
     }
 
     var uppy = new Uppy.Core(

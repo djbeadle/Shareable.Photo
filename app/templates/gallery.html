@@ -98,20 +98,29 @@
     async function share(name){
         // If webshare API is not supported simply redirect to download
         if (!navigator.share){
-           window.location.href = `/full_res/${name}`;
-           return;
+          window.location.href = `/full_res/${name}`;
+          return;
         }
 
-        // If we can webshare fetch the image
-        JsLoadingOverlay.show();
-        fetch(`/full_res/${name}`)
-            .then(res=>res.blob())
-            .then(blob=>{
-                // Remove the folder name
-                const temp_img = new File([blob], name.split('/', 2)[1]);
-                navigator.share({files: [temp_img]})
-            })
-            .then(_ => JsLoadingOverlay.hide());
+        // If Safari 
+        if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+            // If we can webshare fetch the image
+            JsLoadingOverlay.show();
+            fetch(`/full_res/${name}`)
+                .then(res=>res.blob())
+                .then(blob=>{
+                    // Remove the folder name
+                    const temp_img = new File([blob], name.split('/', 2)[1]);
+                    navigator.share({files: [temp_img]})
+                        .catch(() => {});
+                })
+                .then(_ => JsLoadingOverlay.hide())
+                .catch(() => { window.location.href = `/full_res/${name}`; JsLoadingOverlay.hide();});
+        }
+        else {
+            window.location.href = `/full_res/${name}`;
+        }
+
         // await navigator.share({file: await fetch(`/full_res/${name}`).body});
     };
     
