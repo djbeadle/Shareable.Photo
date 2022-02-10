@@ -23,8 +23,6 @@
 <script>
     const { AwsS3, ThumbnailGenerator } = window.Uppy;
 
-    let thumbnail_map = [];
-
     window.onload = function () {
         last_name = document.cookie.split('; ').find(row => row.startsWith('name=')).split('=')[1];
         document.getElementById('uploader-name').value = last_name;
@@ -34,7 +32,8 @@
     // The user doesn't want to identify themselves
     let first_upload = true;
 
-    function update_uploader_name_on_first_upload() {
+    function update_uploader_name_on_first_upload(files) {
+        // Associate the name with these files
         let name = uppy.getState().meta['uploader-name'];
         document.cookie = `name=${name}`;
 
@@ -42,7 +41,7 @@
             name = prompt("Would you like to associate your name with these files?", "anonymous");
             if (name !== null) {
                 document.cookie=`name=${name}`;
-                uppy.setMeta({ 'uploader-name': name });
+                uppy.setMeta({ 'uploader-name': name });    
                 document.getElementById('uploader-name').value = name;
                 first_upload = false;
             }
@@ -52,7 +51,8 @@
         }
     }
 
-    // Prevent EMoji in the name!
+    // Prevent non alpha-numeric characters in the name... names should not be invalid
+    // but I can't support emoji in the filename right now.
     var ranges = [
         '\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
         '\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F
@@ -71,7 +71,7 @@
             restrictions: {
                 allowedFileTypes: ['.jpg', '.JPG', '.jpeg', '.JPEG', '.heic', '.heif', '.png', '.PNG', '.mov', '.MOV', '.mp4', '.MP4', '.gif', '.GIF', '.mkv'],
             },
-            onBeforeUpload: () => update_uploader_name_on_first_upload(),
+            onBeforeUpload: (files) => update_uploader_name_on_first_upload(files),
             meta: {
                 'uploader-name': document.getElementById('uploader-name').value || "anonymous"
             },

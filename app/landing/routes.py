@@ -1,5 +1,5 @@
 from flask import render_template, request, Response, session, redirect, url_for, current_app, make_response
-from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails, increment_view_counter
+from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails, increment_view_counter, get_files_without_thumbnails
 from app.landing import landing_bp
 from app.toolbox import requires_auth
 
@@ -30,7 +30,7 @@ def upload(user_facing_id):
         'uploader.html',
         user_facing_id=user_facing_id,
         custom_title=event_info[1],
-        event_description=event_info[2]
+        event_description=event_info[2],
     )
 
 @landing_bp.route('/create_event')
@@ -83,6 +83,8 @@ def get_event_gallery(user_facing_id: str):
 
     # [("presigned thumbnail url", "url to get presigned full resolution url")]
     event_images = [(create_presigned_url(f'{user_facing_id}/{x[0]}'), f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}') for x in list(get_image_thumbnails(user_facing_id))]
+    # Images without thumbnails
+    no_thumbs = get_files_without_thumbnails(user_facing_id)
    
     event_info = get_event_info(user_facing_id)
 
@@ -92,7 +94,8 @@ def get_event_gallery(user_facing_id: str):
         custom_title=event_info[1],
         zoom_level=request.cookies.get("zoom-level", "three-squares"),
         images=event_images,
-        content=get_event_info(user_facing_id)
+        content=get_event_info(user_facing_id),
+        no_thumbs=no_thumbs
     ))
     r.headers.set('Feature-Policy', "web-share src")
     return r

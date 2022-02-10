@@ -188,6 +188,15 @@
         </div>
     {% endfor %}
     </div>
+
+    {% if no_thumbs != [] %}
+    The following files could not be previewed:
+    <ul>
+    {% for no_thumb in no_thumbs %}
+        <li><a href="/full_res/{{no_thumb[1]}}/{{no_thumb[0]}}">{{no_thumb[0]}}</a></li>
+    {% endfor %}
+    </ul>
+    {% endif %}
 {% endif %}
 
 {% endblock %}

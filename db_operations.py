@@ -154,7 +154,13 @@ def get_image_thumbnails(event_id: str):
     db = get_db()
     cur = db.cursor()
 
-    cur.execute("SELECT filename FROM assets WHERE event_id = ? AND filename LIKE 'thumb%';", [event_id])
+    cur.execute("SELECT filename FROM assets WHERE event_id = ? AND filename LIKE 'thumb%' order by create_date desc;", [event_id])
+    return cur.fetchall()
+
+def get_files_without_thumbnails(event_id: str):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("select filename, event_id from assets where filename not like 'thumb%' AND event_id = ? AND 'thumb_'||filename not in (select filename from assets where event_id = ?);", [event_id, event_id])
     return cur.fetchall()
 
 def get_next_asset_id(event_id: str):
