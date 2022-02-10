@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width">
+    <title>{{ custom_title or "shareable.photo" }}</title>
     <script data-goatcounter="https://eventfire.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
@@ -40,7 +41,7 @@
                     {% if custom_title is defined %}
                     <h1>{{ custom_title }}</h1>
                     {% else %}
-                    <h1>Eventfire</h1>
+                    <h1>Shareable.Photo</h1>
                     {% endif %}
                 </div>
                 {% if user_info['name'] is defined %}
