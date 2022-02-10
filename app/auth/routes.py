@@ -43,7 +43,7 @@ def callback_handling():
     if not get_user(userinfo['sub']):
         insert_user(userinfo['sub'], userinfo['email'])
 
-    return redirect('/dashboard')
+    return redirect('/events')
 
 
 @auth_bp.route('/profile', methods=['GET'])
