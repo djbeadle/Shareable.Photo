@@ -29,7 +29,7 @@
     justify-content: space-between;
 }
 
-#gallery-container div a{
+#gallery-container div .download {
     background: var(--background-body);
     position: relative;
     bottom: 40px;
@@ -44,6 +44,29 @@
 
     /* "Position relative" moves the element but the space originally occupied remains empty, this negative margin cancels it out! */
     margin-bottom: -38px;
+}
+
+#gallery-container div .share {
+    background: var(--background-body);
+    position: relative;
+    bottom: 40px;
+    float: left;
+    color: var(--links);
+    border-radius: 0 50% 0 0;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 1.5;
+    padding: 4px;
+
+    /* "Position relative" moves the element but the space originally occupied remains empty, this negative margin cancels it out! */
+    margin-bottom: -38px;
+}
+
+.highlight {
+    /* Border inside box */
+    box-sizing: border-box;
+    border: 4px solid gold;
 }
 
 .three-squares {
@@ -95,14 +118,38 @@
     // in ascending order from zoomed-out to zoomed-in
     const classes = ["three-per-row", "three-squares", "two-per-row", "two-squares", "full-width"];
 
-    async function share(name){
+    async function share_url(name, rowid){
+        window.location.hash = `#${rowid}`;
+
+        // If Safari show the share sheet.
+        // It doesn't seem to work well in Android, more testing is needed.
+        if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+            navigator.share({url: `${window.location.href}`}).catch(() => {});
+        }
+        else {
+            navigator.clipboard.writeText(window.location.href);
+        }
+
+        hash_trimmed = window.location.hash.slice(1);
+        const highlighted = document.getElementsByClassName("highlight");
+        if (highlighted.length > 0){
+            highlighted[0].classList.remove("highlight");
+        }
+        document.getElementById(`img-${hash_trimmed}`).classList.add("highlight");
+        window.location.hash = hash_trimmed;
+    }
+
+    async function share_image(name, rowid){
+        window.location.hash = `#${rowid}`;
+
         // If webshare API is not supported simply redirect to download
         if (!navigator.share){
           window.location.href = `/full_res/${name}`;
           return;
         }
 
-        // If Safari 
+        // If Safari show the share sheet.
+        // It doesn't seem to work well in Android, more testing is needed.
         if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
             // If we can webshare fetch the image
             JsLoadingOverlay.show();
@@ -114,17 +161,63 @@
                     navigator.share({files: [temp_img]})
                         .catch(() => {});
                 })
-                .then(_ => JsLoadingOverlay.hide())
-                .catch(() => { window.location.href = `/full_res/${name}`; JsLoadingOverlay.hide();});
+                .then(_ => {console.error(_);JsLoadingOverlay.hide()})
+                .catch((err) => { console.error(err);window.location.href = `/full_res/${name}`; JsLoadingOverlay.hide();});
         }
         else {
             window.location.href = `/full_res/${name}`;
         }
-
-        // await navigator.share({file: await fetch(`/full_res/${name}`).body});
     };
-    
+
+    function _top_left_element(){
+        // Find the image closest to the top left corner of the screen;
+        let element_at_point;
+        for (let i = 0; i < 400; i+= 20) {
+            element_at_point = document.elementFromPoint(window.innerWidth / 2 - i, 100+i);
+            if (element_at_point && element_at_point.nodeName === "IMG"){
+                break;
+            }
+        }
+
+        hash_trimmed = window.location.hash.slice(1);
+
+        const highlighted = document.getElementsByClassName("highlight");
+        if (highlighted.length > 0){
+            highlighted[0].classList.remove("highlight");
+        }
+
+        document.getElementById(`img-${hash_trimmed}`).classList.add("highlight");
+        if (element_at_point){
+            window.location.hash = element_at_point.parentNode.id.slice(4);
+        }
+    }
+
     function change_zoom(delta){
+        // Make note of the current location of the element specified in the hash and the user's scroll location before changing the gallery classes to see if the user scrolled
+        const hash_element_location = document.getElementById(`img-${window.location.hash.slice(1)}`).getBoundingClientRect().y;
+        const current_y = document.documentElement.scrollTop || document.body.scrollTop;
+
+        // If an image is currently highlighted record that
+        let highlighted_id;
+        try {
+            highlighted_id = document.getElementsByClassName('highlight')[0].id;
+        } catch (err) {}
+
+        // If an image is specified in the hash
+        if (window.location.hash !== "") {
+            // If the user has scrolled far forget about the element in the hash
+            if (hash_element_location > window.innerHeight || hash_element_location < -200) {
+                highlighted_id = null;
+                _top_left_element();
+            }
+        }
+        // If there is not an element in the hash lock to the image in the top left corner
+        else {
+            _top_left_element();
+        }
+    
+
+        // Modify the gallery image classes
         if (current_idx + delta > classes.length - 1 || current_idx + delta < 0){
             return;
         }
@@ -150,12 +243,20 @@
             zo.disabled = true;
         }
 
+        document.getElementById(`img-${window.location.hash.slice(1)}`).scrollIntoView({behavior: "auto", block: "start", inline: "nearest"});
+
+        // If an image was highlighted highlight it again
+        if (highlighted_id){
+            document.getElementById(highlighted_id).classList.add('highlight');
+        }
+
         // Store the current setting in a cookie
         document.cookie=`zoom-level=${classes[current_idx]}`;
     }
 
     // Retrieve the previous zoom level from the cookie (via the backend)
     current_idx = classes.findIndex(a => a === "{{zoom_level}}");
+
     // If we're at the most zoomed in point we can't zoom in any more
     if (current_idx === classes.length - 1){
         zi.disabled = true;
@@ -163,6 +264,16 @@
     else if (current_idx === 0){
         zo.disabled = true;
     }
+
+    window.addEventListener("load", function(){
+        // Scroll to an element specified in the hash
+        const hash = window.location.hash.slice(1);
+        if (hash.length > 1){
+            const hash_trimmed = hash;
+            document.getElementById(`img-${hash_trimmed}`).scrollIntoView();
+            document.getElementById(`img-${hash_trimmed}`).classList.add("highlight");   
+        }
+    });
 </script>
 {% endblock %}
 
@@ -181,10 +292,10 @@
 {% else %}
     <div id="gallery-container">
     {% for image in images %}
-        <div id="{{image[1]}}" class="{{zoom_level}}" href="/full_res/{{image[1]}}">
+        <div id="img-{{image[2]}}" class="{{zoom_level}}" href="/full_res/{{image[1]}}">
             <img style="width:100%;" src="{{image[0]}}">
-            <!-- <a href="/full_res/{{image[1]}}">&#10515;</a> -->
-            <a onclick="share('{{image[1]}}');">&#10515</a>
+            <a title="Copy link to clipboard" class="share" onclick="share_url('{{image[1]}}', '{{image[2]}}');">📋</a>
+            <a class="download" onclick="share_image('{{image[1]}}', '{{image[2]}}');">&#10515</a>
         </div>
     {% endfor %}
     </div>

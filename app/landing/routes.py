@@ -81,8 +81,13 @@ def get_event_gallery(user_facing_id: str):
     if x is None:
         return Response(f'Either this event does not exist or you are not authorized to view its gallery. Try logging in at {url_for("auth_bp.login", _external=True)}', status=404)
 
-    # [("presigned thumbnail url", "url to get presigned full resolution url")]
-    event_images = [(create_presigned_url(f'{user_facing_id}/{x[0]}'), f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}') for x in list(get_image_thumbnails(user_facing_id))]
+    # [("presigned thumbnail url", "url to get presigned full resolution url", rowid)]
+    event_images = [
+        (
+            create_presigned_url(f'{user_facing_id}/{x[0]}'),
+            f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}',
+            x[1]
+        ) for x in list(get_image_thumbnails(user_facing_id))]
     # Images without thumbnails
     no_thumbs = get_files_without_thumbnails(user_facing_id)
    
