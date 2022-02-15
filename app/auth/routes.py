@@ -204,7 +204,7 @@ def upload_profile_pic():
 @auth_bp.route('/<user_facing_id>/s3/upload_thumbnail')
 def get_presigned_s3_thumbnail_url(user_facing_id):
     print(json.dumps(request.args, indent=2))
-    return json.dumps(generate_presigned_post(f'{user_facing_id}/{request.args["filename"]}', "", {}))
+    return json.dumps(generate_presigned_post(f'{user_facing_id}/{request.args["filename"]}', "", {"Cache-Control": "public, max-age=31536000, immutable"}))
 
 
 @auth_bp.route('/<user_facing_id>/s3/params')
@@ -213,7 +213,9 @@ def get_presigned_s3_upload_url(user_facing_id):
     # TODO-prod: Keep tracing of the user_facing_ids and validate if this is in the database. For now just see if it's a valid UUID
     try:
         current_user_facing_id = UUID(user_facing_id)
+        
         print(f'metadata: {json.dumps(request.args)}')
+
         uploader_name = request.args.get('metadata[uploader-name]')
         file_type = request.args.get('type')
     except ValueError as e:
@@ -226,7 +228,8 @@ def get_presigned_s3_upload_url(user_facing_id):
     
     fields = {
         'x-amz-meta-uploader-name': uploader_name,
-        'Content-Type': file_type
+        'Content-Type': file_type,
+        'Cache-Control': "public, max-age=31536000, immutable"
     }
 
     x = generate_presigned_post(filename_with_folder, params['type'], fields)

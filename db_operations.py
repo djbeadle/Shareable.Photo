@@ -178,3 +178,9 @@ def get_next_asset_id(event_id: str):
     
     print(x)
     return x
+
+def most_downloaded():
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("SELECT filename, eventid, views FROM assets ORDER BY views DESC;")
+    return cur.fetchall()
