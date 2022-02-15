@@ -41,7 +41,7 @@ def generate_presigned_post(filename, type, fields):
     )
 
 
-def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire"):
+def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire", disposition="attachment"):
     """
     Generate a presigned URL to share an S3 object
 
@@ -58,7 +58,7 @@ def create_presigned_url(object_name: str, expiration=30, bucket_name="eventfire
             Params={
                 'Bucket': bucket_name,
                 'Key': object_name.replace("+", " "),
-                'ResponseContentDisposition': f'inline; filename={object_name.split("/")[1]}'
+                'ResponseContentDisposition': f'{disposition}; filename={object_name.split("/")[1]}'
             },
             ExpiresIn=expiration
         )

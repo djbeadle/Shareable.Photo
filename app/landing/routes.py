@@ -84,7 +84,7 @@ def get_event_gallery(user_facing_id: str):
     # [("presigned thumbnail url", "url to get presigned full resolution url", rowid)]
     event_images = [
         (
-            create_presigned_url(f'{user_facing_id}/{x[0]}'),
+            create_presigned_url(f'{user_facing_id}/{x[0]}', disposition="inline"),
             f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}',
             x[1]
         ) for x in list(get_image_thumbnails(user_facing_id))]
