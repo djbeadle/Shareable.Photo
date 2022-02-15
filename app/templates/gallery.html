@@ -186,7 +186,9 @@
             highlighted[0].classList.remove("highlight");
         }
 
-        document.getElementById(`img-${hash_trimmed}`).classList.add("highlight");
+        if (hash_trimmed > 0){
+            document.getElementById(`img-${hash_trimmed}`).classList.add("highlight");
+        }
         if (element_at_point){
             window.location.hash = element_at_point.parentNode.id.slice(4);
         }
@@ -194,7 +196,11 @@
 
     function change_zoom(delta){
         // Make note of the current location of the element specified in the hash and the user's scroll location before changing the gallery classes to see if the user scrolled
-        const hash_element_location = document.getElementById(`img-${window.location.hash.slice(1)}`).getBoundingClientRect().y;
+        let hash_element_location;
+        if (window.location.hash.length > 0){
+            hash_element_location = document.getElementById(`img-${window.location.hash.slice(1)}`).getBoundingClientRect().y;
+        }
+        
         const current_y = document.documentElement.scrollTop || document.body.scrollTop;
 
         // If an image is currently highlighted record that
