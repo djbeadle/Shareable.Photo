@@ -2,6 +2,7 @@ from flask import render_template, request, Response, session, redirect, url_for
 from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails, increment_view_counter, get_files_without_thumbnails
 from app.landing import landing_bp
 from app.toolbox import requires_auth
+import json
 
 from s3 import create_presigned_url
 
@@ -26,12 +27,19 @@ def home():
 @landing_bp.route('/uploader/<user_facing_id>')
 def upload(user_facing_id):
     event_info = get_event_info(user_facing_id)
+
+    # No public uploads
+    if event_info[3] == 2:
+        if not session.get('jwt_payload') or session['jwt_payload']['sub'] != event_info[4]:
+            return "This event does not allow public uploads."
+        
     return render_template(
-        'uploader.html',
-        user_facing_id=user_facing_id,
-        custom_title=event_info[1],
-        event_description=event_info[2],
-    )
+            'uploader.html',
+            user_facing_id=user_facing_id,
+            custom_title=event_info[1],
+            event_description=event_info[2]
+        )
+    
 
 @landing_bp.route('/create_event')
 @requires_auth
