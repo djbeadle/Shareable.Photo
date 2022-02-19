@@ -3,6 +3,9 @@
 {% block extra_head %}
 {# https://js-loading-overlay.muhdfaiz.com/ #}
 <script src="https://cdn.jsdelivr.net/npm/js-loading-overlay@1.2.0/dist/js-loading-overlay.min.js" integrity="sha256-g9BS2M5/bvSHiIEZeQhkCpJP0iBorA5mnDznsk+89OU=" crossorigin="anonymous"></script>
+
+<meta property="og:title" content="{{custom_title}}" />
+<meta property="og:image" content="{{og_image}}" />
 {% endblock %}
 
 {% block extra_styles %}

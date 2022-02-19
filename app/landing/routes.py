@@ -119,7 +119,8 @@ def get_event_gallery(user_facing_id: str):
         images=event_images,
         content=get_event_info(user_facing_id),
         no_thumbs=no_thumbs,
-        description=event_info[2]
+        description=event_info[2],
+        og_image=event_images[0][0]
     ))
     r.headers.set('Feature-Policy', "web-share src")
     return r
