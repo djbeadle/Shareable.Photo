@@ -150,14 +150,14 @@ def get_images(event_id: str):
     cur.execute("SELECT filename FROM assets WHERE event_id = ?", [event_id])
     return cur.fetchall()
 
-def get_image_thumbnails(event_id: str, order_by="create date DESC"):
+def get_image_thumbnails(event_id: str, order_by="create_date DESC"):
     db = get_db()
     cur = db.cursor()
 
     cur.execute(f'SELECT filename, rowid FROM assets WHERE event_id = ? AND filename LIKE \'thumb%\' ORDER BY {order_by};', [event_id])
     return cur.fetchall()
 
-def get_files_without_thumbnails(event_id: str, order_by="create date DESC"):
+def get_files_without_thumbnails(event_id: str, order_by="create_date DESC"):
     db = get_db()
     cur = db.cursor()
     cur.execute(f'select filename, event_id from assets where filename not like \'thumb%\' AND event_id = ? AND \'thumb_\'||filename not in (select filename from assets where event_id = ?) ORDER BY {order_by};', [event_id, event_id])

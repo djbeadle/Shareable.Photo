@@ -89,23 +89,27 @@ def get_event_gallery(user_facing_id: str):
     if event_info is None:
         return Response(f'Either this event does not exist or you are not authorized to view its gallery. Try logging in at {url_for("auth_bp.login", _external=True)}', status=404)
 
-    # Change sort mechanism based on status colum
-    sort_method = "create_date desc"  # Default is by create date so the most recently uploaded photos are first
-    # status==2 means that public uploads are not allowed, typically used by Daniel for photo albums
-    print(json.dumps(event_info))
-    if event_info[2] == 2:
-        sort_method = "filename asc"
-
     # [("presigned thumbnail url", "url to get presigned full resolution url", rowid)]
     event_images = [
         (
             create_presigned_url(f'{user_facing_id}/{x[0]}', disposition="inline"),
             f'{user_facing_id}/{x[0].replace("thumb_", "", 1)}',
             x[1]
-        ) for x in list(get_image_thumbnails(user_facing_id, sort_method))]
+        ) for x in list(get_image_thumbnails(user_facing_id))
+    ]
     # Images without thumbnails
-    no_thumbs = get_files_without_thumbnails(user_facing_id, sort_method)
+    no_thumbs = get_files_without_thumbnails(user_facing_id)
    
+    # Change sort mechanism based on status colum
+    # status==2 means that public uploads are not allowed, typically used by Daniel for photo albums
+    print(json.dumps(event_info))
+    if event_info[3] == 2:
+        # thumb_155_Daniel_DSC_6785 2.jpg
+        list.sort(
+            event_images,
+            key=lambda x: x[0].split("_", maxsplit=3)[3],
+            reverse=False
+        )
 
     r = make_response(render_template(
         'gallery.html',
