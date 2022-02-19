@@ -71,7 +71,15 @@
 
 .three-squares {
     width: 32%;
-    
+}
+
+.three-per-row{
+    width: 32%;
+    text-align:center;
+}
+
+.three-per-row img {
+    width: 100%;
 }
 
 .three-squares img {
@@ -81,14 +89,8 @@
     object-fit: cover;
 }
 
-.three-per-row{
-    width: 32%;
-    text-align:center;
-}
-
 .two-squares {
     width: 47%;
-    
 }
 
 .two-squares img {
@@ -98,14 +100,23 @@
     object-fit: cover;
 }
 
-.two-per-row{
+.two-per-row {
     width: 48%;
     text-align:center;
 }
-.full-width{
+
+.full-width {
     width: 100%;
     text-align:center;
 }
+
+.full-width img {
+    max-width: 100% !important;
+    object-fit: contain;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 {% endblock %}
 
 {% block scripts %}
@@ -284,6 +295,10 @@
 {% endblock %}
 
 {% block content %}
+
+<blockquote>
+{{description}}
+</blockquote>
 <div id="title">
     <a class="nav-button" style="margin-right:100%; margin-left:0; margin-right:0;" href="/uploader/{{ content[0] }}">Upload!</a>
 
@@ -299,7 +314,7 @@
     <div id="gallery-container">
     {% for image in images %}
         <div id="img-{{image[2]}}" class="{{zoom_level}}" href="/full_res/{{image[1]}}">
-            <img style="width:100%;" src="{{image[0]}}">
+            <img src="{{image[0]}}">
             <a title="Copy link to clipboard" class="share" onclick="share_url('{{image[1]}}', '{{image[2]}}');">📋</a>
             <a class="download" onclick="share_image('{{image[1]}}', '{{image[2]}}');">&#10515</a>
         </div>
