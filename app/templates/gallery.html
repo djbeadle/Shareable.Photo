@@ -156,6 +156,8 @@
 
     async function share_image(name, rowid){
         window.location.hash = `#${rowid}`;
+        window.location.href = `/full_res/${name}`;
+        return;
 
         // If webshare API is not supported simply redirect to download
         if (!navigator.share){
@@ -172,11 +174,11 @@
                 .then(res=>res.blob())
                 .then(blob=>{
                     // Remove the folder name
-                    const temp_img = new File([blob], name.split('/', 2)[1]);
+                    const temp_img = new File([blob], name.split('/')[1]);
                     navigator.share({files: [temp_img]})
                         .catch(() => {});
                 })
-                .then(_ => {console.error(_);JsLoadingOverlay.hide()})
+                .then(s => {console.info(s);JsLoadingOverlay.hide()})
                 .catch((err) => { console.error(err);window.location.href = `/full_res/${name}`; JsLoadingOverlay.hide();});
         }
         else {
