@@ -90,7 +90,8 @@ def create_app(config_name):
               description TEXT,
               status INTEGER DEFAULT 0, -- 0: active, 1: disabled, 2: reserved for future use
               owner_user_id TEXT NOT NULL,
-              asset_id INTEGER DEFAULT 0
+              asset_id INTEGER DEFAULT 0,
+              preview TEXT
             );
 
             CREATE TABLE IF NOT EXISTS users(

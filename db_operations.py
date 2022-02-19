@@ -69,7 +69,7 @@ def get_event_info(user_facing_id):
     cur = db.cursor()
 
     try:
-        cur.execute("SELECT user_facing_id, title, description, status, owner_user_id FROM events WHERE user_facing_id = ?;", (user_facing_id, ))
+        cur.execute("SELECT user_facing_id, title, description, status, owner_user_id, preview FROM events WHERE user_facing_id = ?;", (user_facing_id, ))
         return cur.fetchone()
     except Exception as e:
         print(f'An error occurred fetching event "{user_facing_id}"')

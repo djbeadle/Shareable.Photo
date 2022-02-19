@@ -120,7 +120,8 @@ def get_event_gallery(user_facing_id: str):
         content=get_event_info(user_facing_id),
         no_thumbs=no_thumbs,
         description=event_info[2],
-        og_image=event_images[0][0]
+        # If a preview image is defined for this event use it, otherwise use the first image
+        og_image=create_presigned_url(f'{user_facing_id}/{event_info[5]}') if event_info[5] else event_images[0][0]
     ))
     r.headers.set('Feature-Policy', "web-share src")
     return r
