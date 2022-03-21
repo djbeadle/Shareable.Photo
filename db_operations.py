@@ -2,10 +2,12 @@ import sqlite3, uuid, json
 from flask import current_app, g
 from typing import Union
 
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(current_app.config['DB_NAME'])
+        db.row_factory = sqlite3.Row
     return db
 
 def increment_view_counter(event_id, filename):
