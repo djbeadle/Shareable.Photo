@@ -113,7 +113,7 @@ def get_event_gallery(user_facing_id: str):
         )
 
     show_upload_button = True
-    if event_info[3] == 2 and session and session['jwt_payload']['sub'] == event_info[5]:
+    if event_info[3] == 2 and session and session['jwt_payload']['sub'] == event_info[4]:
         show_upload_button = True
     elif event_info[3] == 2:
         show_upload_button = False
