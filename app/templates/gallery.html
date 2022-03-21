@@ -173,12 +173,17 @@
             fetch(`/full_res/${name}`)
                 .then(res=>res.blob())
                 .then(blob=>{
+                    console.log(1);
                     // Remove the folder name
                     const temp_img = new File([blob], name.split('/')[1]);
                     navigator.share({files: [temp_img]})
                         .catch(() => {});
                 })
-                .then(s => {console.info(s);JsLoadingOverlay.hide()})
+                .then(s => {
+                    console.log(2);
+                    console.info(s);
+                    JsLoadingOverlay.hide();
+                })
                 .catch((err) => { console.error(err);window.location.href = `/full_res/${name}`; JsLoadingOverlay.hide();});
         }
         else {
