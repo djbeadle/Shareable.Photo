@@ -1,6 +1,10 @@
+from re import L
 import sqlite3, uuid, json
 from flask import current_app, g
 from typing import Union
+
+import http.client
+
 
 
 def get_db():
@@ -30,7 +34,9 @@ def list_all_events():
             SELECT user_facing_id, title, description, status, event_total
             FROM events
             LEFT JOIN (SELECT event_id, Sum(size) AS event_total FROM assets GROUP BY event_id) AS a
-            ON events.user_facing_id = a.event_id""")
+            ON events.user_facing_id = a.event_id
+            ORDER BY id DESC;
+        """)
         rows = cur.fetchall()
         db.commit()
         db.close()
@@ -38,6 +44,23 @@ def list_all_events():
     except Exception as e:
         print("An error occurred fetching all of the events.")
         print(e)
+
+
+def list_all_users():
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("""
+        SELECT
+            owner_user_id,
+            email,
+            count(owner_user_id) as num_events
+        FROM EVENTS,
+            users
+        WHERE events.owner_user_id = users.user_id
+        GROUP BY user_id
+        ORDER BY user_id DESC;
+    """)
+    return cur.fetchall()
 
 
 def list_users_events(owner_user_email):
@@ -134,6 +157,22 @@ def insert_user(user_id, email):
         db.commit()
     except Exception as e:
         print(f'An error occurred while trying to insert {user_id} into the users table.')
+        print(e)
+
+    try:
+        conn = http.client.HTTPSConnection("api.pushover.net")
+        conn.request(
+            "POST",
+            "/1/messages.json",
+            body=json.dumps({
+                'title': "New user!",
+                'token':'a1t4mpoy3tcrhazsjmjj7pi3upa7wf',
+                'user': 'un6wzo4tke8pxbe726fcxnd3hxfmo8',
+                'message': email
+            })
+        )
+    except Exception as e:
+        print('An error occurred while communicating with Pushover')
         print(e)
 
 

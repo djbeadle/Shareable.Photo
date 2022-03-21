@@ -2,7 +2,7 @@ from http.client import HTTPResponse
 from flask import session, render_template, Response
 from app.manage import manage_bp
 
-from db_operations import list_all_events
+from db_operations import list_all_events, list_all_users
 
 import json
 
@@ -29,4 +29,11 @@ def list_events():
     return render_template(
         'list_events.html',
         events=list_all_events()
+    )
+
+@manage_bp.route("/manage/all_users")
+def list_users():
+    return render_template(
+        'list_users.html',
+        users=list_all_users()
     )

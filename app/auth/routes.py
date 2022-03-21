@@ -43,6 +43,20 @@ def callback_handling():
     if not get_user(userinfo['sub']):
         insert_user(userinfo['sub'], userinfo['email'])
 
+        if current_app.config["PUSHOVER_USER"]:
+            conn = http.client.HTTPSConnection("api.pushover.net")
+            conn.request(
+                "POST",
+                "/1/messages.json",
+                urllib.parse.urlencode({
+                    'title': "New user!",
+                    'token':current_app.config["PUSHOVER_TOKEN"],
+                    'user': current_app.config["PUSHOVER_USER"],
+                    'message': userinfo['name']
+                }),
+                { "Content-type": "application/x-www-form-urlencoded" }
+            )
+
     return redirect('/events')
 
 

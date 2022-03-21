@@ -5,6 +5,9 @@ from app.landing import landing_bp
 from app.toolbox import requires_auth
 import json
 
+import http.client
+from urllib.parse import urlencode
+
 from s3 import create_presigned_url
 
 
@@ -52,7 +55,21 @@ def create_form():
 @requires_auth
 def create_submit():
     new_event_user_facing_id = create_event(request.form['title'], request.form['description'], session['jwt_payload']['sub'])
-    
+
+    if current_app.config["PUSHOVER_USER"]:
+        conn = http.client.HTTPSConnection("api.pushover.net")
+        conn.request(
+            "POST",
+            "/1/messages.json",
+            urlencode({
+                'title': "New event!",
+                'token': current_app.config["PUSHOVER_TOKEN"],
+                'user': current_app.config["PUSHOVER_USER"],
+                'message': f'{request.form["title"]}'
+            }),
+            { "Content-type": "application/x-www-form-urlencoded" }
+        )
+
     return redirect(f'{url_for("landing_bp.get_event", user_facing_id=new_event_user_facing_id)}')
 
 

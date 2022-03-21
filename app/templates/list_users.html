@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+{% for user in users %}
+<li>
+    <b>{{ user.email }}</b><br>
+    <i>{{ user.num_events }} events</i><br>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
