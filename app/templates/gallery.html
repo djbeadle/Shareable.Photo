@@ -311,7 +311,9 @@
 {{description}}
 </blockquote>
 <div id="title">
+    {% if show_upload_button %}
     <a class="nav-button" style="margin-right:100%; margin-left:0; margin-right:0;" href="/uploader/{{ content[0] }}">Upload!</a>
+    {% endif %}
 
     <div>Zoom:
         <button id="zoom_out" onClick="change_zoom(-1);">-</button>

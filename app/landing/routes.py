@@ -1,3 +1,4 @@
+from operator import truediv
 from flask import render_template, request, Response, session, redirect, url_for, current_app, make_response
 from db_operations import create_event, get_event_info, list_users_events, event_asset_count, get_images, get_image_thumbnails, increment_view_counter, get_files_without_thumbnails
 from app.landing import landing_bp
@@ -111,6 +112,12 @@ def get_event_gallery(user_facing_id: str):
             reverse=False
         )
 
+    show_upload_button = True
+    if event_info[3] == 2 and session['jwt_payload']['sub'] == event_info[5]:
+        show_upload_button = True
+    elif event_info[3] == 2:
+        show_upload_button = False
+
     r = make_response(render_template(
         'gallery.html',
         asset_count=event_asset_count(user_facing_id),
@@ -120,6 +127,7 @@ def get_event_gallery(user_facing_id: str):
         content=get_event_info(user_facing_id),
         no_thumbs=no_thumbs,
         description=event_info[2],
+        show_upload_button=show_upload_button,
         # If a preview image is defined for this event use it, otherwise use the first image
         og_image=create_presigned_url(f'{user_facing_id}/{event_info[5]}') if event_info[5] else event_images[0][0]
     ))
