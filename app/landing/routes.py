@@ -135,6 +135,16 @@ def get_event_gallery(user_facing_id: str):
     elif event_info[3] == 2:
         show_upload_button = False
 
+    # If an ogimage has been set in the events table use that
+    if event_info[5] is not None:
+        social_og_image = create_presigned_url(f'{user_facing_id}/{event_info[5]}')
+    # If the event has images use the first image
+    elif len(event_images) > 0:
+        social_og_image = event_images[0][0]
+    # Otherwise use nothing 
+    else:
+        social_og_image = ""
+
     r = make_response(render_template(
         'gallery.html',
         asset_count=event_asset_count(user_facing_id),
@@ -146,7 +156,7 @@ def get_event_gallery(user_facing_id: str):
         description=event_info[2],
         show_upload_button=show_upload_button,
         # If a preview image is defined for this event use it, otherwise use the first image
-        og_image=create_presigned_url(f'{user_facing_id}/{event_info[5]}') if event_info[5] else event_images[0][0]
+        og_image=social_og_image
     ))
     r.headers.set('Feature-Policy', "web-share src")
     return r
