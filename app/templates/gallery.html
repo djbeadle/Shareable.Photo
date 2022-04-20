@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block extra_head %}
+
+<meta name="robots" content="noindex, nofollow, noarchive, noimageindex, nosnippet">
+
 {# https://js-loading-overlay.muhdfaiz.com/ #}
 <script src="https://cdn.jsdelivr.net/npm/js-loading-overlay@1.2.0/dist/js-loading-overlay.min.js" integrity="sha256-g9BS2M5/bvSHiIEZeQhkCpJP0iBorA5mnDznsk+89OU=" crossorigin="anonymous"></script>
 
@@ -321,7 +324,24 @@
     </div>
 </div>
 
-{% if asset_count == 0 %}
+{% if no_thumbs != [] %}
+The following files could not be previewed:
+<ul>
+{% for no_thumb in no_thumbs %}
+
+    {% if '.mp4' in no_thumb[0]|lower %}
+    <video controls style="max-width: 100%; max-height: 60vh;" type="video/mp4">
+        <source src="/full_res/{{no_thumb[1]}}/{{no_thumb[0]}}">
+        This video isn't supported in your browser. <a href="/full_res/{{no_thumb[1]}}/{{no_thumb[0]}}">Download {{no_thumb[0]}}</a>
+    </video>
+    {% else %}
+        <li><a href="/full_res/{{no_thumb[1]}}/{{no_thumb[0]}}">{{no_thumb[0]}}</a></li>
+    {% endif %}
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if asset_count == 0 %} 
     <p>Nothing has been uploaded yet!</p>
 {% else %}
     <div id="gallery-container">
@@ -334,14 +354,7 @@
     {% endfor %}
     </div>
 
-    {% if no_thumbs != [] %}
-    The following files could not be previewed:
-    <ul>
-    {% for no_thumb in no_thumbs %}
-        <li><a href="/full_res/{{no_thumb[1]}}/{{no_thumb[0]}}">{{no_thumb[0]}}</a></li>
-    {% endfor %}
-    </ul>
-    {% endif %}
+
 {% endif %}
 
 {% endblock %}

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow, noarchive, noimageindex, nosnippet">
+{% endblock %}
+
 {% block content %}
 <h2>{{ content[1] }}</h2>
 <a href="/uploader/{{ content[0] }}">Upload!</a>
