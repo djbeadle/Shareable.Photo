@@ -79,7 +79,7 @@ def create_app(config_name):
         client_kwargs={
             'scope': 'openid profile email',
         },
-        server_metadata_url=f'https://eventfire.auth0.com/.well-known/openid-configuration'
+        server_metadata_url=f'https://{auth0_base}/.well-known/openid-configuration',
     )
 
     try:
