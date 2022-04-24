@@ -122,7 +122,7 @@ def get_event_gallery(user_facing_id: str):
    
     # Change sort mechanism based on status colum
     # status==2 means that public uploads are not allowed, typically used by Daniel for photo albums
-    show_upload_button = True
+    show_upload_button = False
     if event_info['status'] == 2:
         show_upload_button = False
         # thumb_155_Daniel_DSC_6785 2.jpg
@@ -131,10 +131,12 @@ def get_event_gallery(user_facing_id: str):
             key=lambda x: x[0].split("_", maxsplit=3)[3],
             reverse=False
         )
-    if event_info['status'] == 1 and session and session['jwt_payload']['sub'] == event_info['owner_user_id']:
+    elif event_info['status'] == 1 and session and session['jwt_payload']['sub'] == event_info['owner_user_id']:
         show_upload_button = True
     elif event_info['status'] == 2:
         show_upload_button = False
+    elif event_info['status'] == 0:
+        show_upload_button = True
 
     # If an ogimage has been set in the events table use that
     if event_info[5] is not None:
