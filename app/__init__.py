@@ -79,6 +79,7 @@ def create_app(config_name):
         client_kwargs={
             'scope': 'openid profile email',
         },
+        server_metadata_url=f'https://eventfire.auth0.com/.well-known/openid-configuration'
     )
 
     try:
@@ -127,6 +128,9 @@ def create_app(config_name):
 
     from app.manage import manage_bp
     app.register_blueprint(manage_bp)
+
+    from app.api import api_bp
+    app.register_blueprint(api_bp)
 
     @app.teardown_appcontext
     def close_connection(exception):
