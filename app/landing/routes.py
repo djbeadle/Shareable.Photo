@@ -131,7 +131,7 @@ def get_event_gallery(user_facing_id: str):
             key=lambda x: x[0].split("_", maxsplit=3)[3],
             reverse=False
         )
-    if event_info['status'] == 1 and session and session['jwt_payload']['sub'] == event_info.owner_user_id:
+    if event_info['status'] == 1 and session and session['jwt_payload']['sub'] == event_info['owner_user_id']:
         show_upload_button = True
     elif event_info['status'] == 2:
         show_upload_button = False
