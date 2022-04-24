@@ -36,6 +36,8 @@ def upload(user_facing_id):
     if event_info[3] == 2:
         if not session.get('jwt_payload') or session['jwt_payload']['sub'] != event_info[4]:
             return "This event does not allow public uploads."
+    if not session.get('jwt_payload') or session['jwt_payload']['sub'] != event_info['owner_user_id']:
+        return "Only the event's creator can upload. If that's you please navigate to the main page and log in."
         
     return render_template(
             'uploader.html',
@@ -120,19 +122,18 @@ def get_event_gallery(user_facing_id: str):
    
     # Change sort mechanism based on status colum
     # status==2 means that public uploads are not allowed, typically used by Daniel for photo albums
-    print(json.dumps(event_info))
-    if event_info[3] == 2:
+    show_upload_button = True
+    if event_info['status'] == 2:
+        show_upload_button = False
         # thumb_155_Daniel_DSC_6785 2.jpg
         list.sort(
             event_images,
             key=lambda x: x[0].split("_", maxsplit=3)[3],
             reverse=False
         )
-
-    show_upload_button = True
-    if event_info[3] == 2 and session and session['jwt_payload']['sub'] == event_info[4]:
+    if event_info['status'] == 1 and session and session['jwt_payload']['sub'] == event_info.owner_user_id:
         show_upload_button = True
-    elif event_info[3] == 2:
+    elif event_info['status'] == 2:
         show_upload_button = False
 
     # If an ogimage has been set in the events table use that
@@ -151,7 +152,7 @@ def get_event_gallery(user_facing_id: str):
         custom_title=event_info[1],
         zoom_level=request.cookies.get("zoom-level", "three-squares"),
         images=event_images,
-        content=get_event_info(user_facing_id),
+        content=event_info,
         no_thumbs=no_thumbs,
         description=event_info[2],
         show_upload_button=show_upload_button,

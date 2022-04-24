@@ -90,7 +90,7 @@ def list_users_events(owner_user_email):
         print(e)
 
 def get_event_info(user_facing_id):
-    db = sqlite3.connect(current_app.config['DB_NAME'])
+    db = get_db()
     cur = db.cursor()
 
     try:

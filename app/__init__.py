@@ -89,7 +89,8 @@ def create_app(config_name):
               user_facing_id VARCHAR(32),
               title TEXT,
               description TEXT,
-              status INTEGER DEFAULT 0, -- 0: active, 1: disabled, 2: reserved for future use
+              status INTEGER DEFAULT 0, -- 0: active, 1: only creator, 2: public uploads are not allowed, typically used by Daniel for photo albums, 3+ reserved for future use
+              type INTEGER DEFAULT 0, -- 0: shared album, 
               owner_user_id TEXT NOT NULL,
               asset_id INTEGER DEFAULT 0,
               preview TEXT
