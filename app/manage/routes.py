@@ -1,5 +1,5 @@
 from http.client import HTTPResponse
-from flask import session, render_template, Response
+from flask import current_app, session, render_template, Response
 from app.manage import manage_bp
 
 from db_operations import list_all_events, list_all_users
@@ -21,7 +21,7 @@ def inject_user():
 
 @manage_bp.before_request
 def djbeadle_only():
-    if session.get('jwt_payload') is None or session['jwt_payload']['sub'] != 'google-oauth2|102945930198047778272':
+    if session.get('jwt_payload') is None or session['jwt_payload']['sub'] != current_app['ADMIN_SUB']:
         return Response(json.dumps({"error": "Sorry, buddy."}), status=400, mimetype="application/json")
 
 @manage_bp.route("/manage/all_events")
